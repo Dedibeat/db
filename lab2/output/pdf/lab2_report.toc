@@ -1,0 +1,10 @@
+\contentsline {section}{\numberline {1}Хамгийн их дүнтэй 10 захиалга}{3}{section.1}%
+\contentsline {section}{\numberline {2}Захиалгын дундаж дүн өндөртэй харилцагчид}{4}{section.2}%
+\contentsline {section}{\numberline {3}Ангилал бүрийн шилдэг борлуулалттай 3 бүтээгдэхүүн}{5}{section.3}%
+\contentsline {section}{\numberline {4}Рекурсив CTE ашигласан ажилтны шатлал}{7}{section.4}%
+\contentsline {section}{\numberline {5}CHECK OPTION бүхий шинэчлэгдэх боломжтой харагдац}{8}{section.5}%
+\contentsline {section}{\numberline {6}Материалчлагдсан сарын борлуулалтын харагдац}{10}{section.6}%
+\contentsline {section}{\numberline {7}Нөхцөлт агрегат ашигласан пивот харагдац}{12}{section.7}%
+\contentsline {section}{\numberline {8}Харагдац ашигласан харагдац ба сарын өөрчлөлт}{15}{section.8}%
+\contentsline {section}{\numberline {9}Хожимдсон хүргэлтийн шинжилгээ}{17}{section.9}%
+\contentsline {section}{\numberline {10}Бараа материалын төлөвийн харагдац}{18}{section.10}%

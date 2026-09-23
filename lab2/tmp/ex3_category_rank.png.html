@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    display: inline-block;
+  }
+  .panel {
+    background: #181818;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    margin: 8px;
+    display: inline-block;
+  }
+  .panel-header {
+    background: #252526;
+    padding: 8px 16px;
+    border-bottom: 1px solid #333333;
+    font-size: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "DejaVu Sans", sans-serif;
+    color: #9cdcfe;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+  }
+  .panel-header .title {
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .panel-header .meta {
+    color: #858585;
+    font-size: 11px;
+    background: #1e1e1e;
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid #3c3c3c;
+  }
+  table {
+    border-collapse: collapse;
+    font-family: 'DejaVu Sans Mono', Consolas, monospace;
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+  th {
+    background: #1f1f1f;
+    color: #4ec9b0;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-bottom: 2px solid #383838;
+    border-right: 1px solid #2d2d2d;
+    white-space: nowrap;
+    text-align: left;
+  }
+  th.num { text-align: right; }
+  th.center { text-align: center; }
+  th:last-child { border-right: none; }
+  td {
+    padding: 5px 14px;
+    border-bottom: 1px solid #262626;
+    border-right: 1px solid #262626;
+    color: #cccccc;
+    white-space: nowrap;
+  }
+  td:last-child { border-right: none; }
+  tr:nth-child(even) td {
+    background: #151515;
+  }
+  tr:nth-child(odd) td {
+    background: #1c1c1c;
+  }
+  td.num { text-align: right; color: #b5cea8; }
+  td.text { text-align: left; }
+  td.date { text-align: center; color: #ce9178; }
+  td.id { text-align: right; color: #9cdcfe; font-weight: 600; }
+  td.rank { text-align: center; color: #dcdcaa; font-weight: bold; }
+  
+  .badge {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .badge-ok { background: rgba(78, 201, 176, 0.18); color: #4ec9b0; border: 1px solid rgba(78, 201, 176, 0.4); }
+  .badge-low { background: rgba(220, 220, 170, 0.18); color: #dcdcaa; border: 1px solid rgba(220, 220, 170, 0.4); }
+  .badge-reorder { background: rgba(244, 71, 71, 0.22); color: #f48771; border: 1px solid rgba(244, 71, 71, 0.5); }
+  .badge-late { background: rgba(244, 71, 71, 0.22); color: #f48771; border: 1px solid rgba(244, 71, 71, 0.5); }
+  .badge-ontime { background: rgba(78, 201, 176, 0.18); color: #4ec9b0; border: 1px solid rgba(78, 201, 176, 0.4); }
+
+  /* Console error styling */
+  .console {
+    background: #181818;
+    color: #cccccc;
+    font-family: 'DejaVu Sans Mono', Consolas, monospace;
+    font-size: 12px;
+    padding: 14px 18px;
+    border-left: 4px solid #f44747;
+    line-height: 1.55;
+    min-width: 680px;
+  }
+  .console .cmd {
+    color: #9cdcfe;
+    margin-bottom: 8px;
+  }
+  .console .err {
+    color: #f48771;
+    font-weight: 600;
+  }
+  .console .detail {
+    color: #858585;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+    <div class='panel'>
+      <div class='panel-header'>
+        <span class='title'>v_product_category_rank — Ангилал бүрийн шилдэг 3 бүтээгдэхүүн</span>
+        <span class='meta'>24 rows (8 categories)</span>
+      </div>
+      <table>
+        <thead><tr><th class='text'>category_name</th><th class='text'>product_name</th><th class='num'>total_sales</th><th class='num'>sales_rank</th></tr></thead>
+        <tbody><tr><td class='text'>Beverages</td><td class='text'>Côte de Blaye</td><td class='num'>141,396.74</td><td class='rank'>1</td></tr>
+<tr><td class='text'>Beverages</td><td class='text'>Ipoh Coffee</td><td class='num'>23,526.70</td><td class='rank'>2</td></tr>
+<tr><td class='text'>Beverages</td><td class='text'>Chang</td><td class='num'>16,355.96</td><td class='rank'>3</td></tr>
+<tr><td class='text'>Condiments</td><td class='text'>Vegie-spread</td><td class='num'>16,701.10</td><td class='rank'>1</td></tr>
+<tr><td class='text'>Condiments</td><td class='text'>Sirop d'érable</td><td class='num'>14,352.60</td><td class='rank'>2</td></tr>
+<tr><td class='text'>Condiments</td><td class='text'>Louisiana Fiery Hot Pepper Sauce</td><td class='num'>13,869.89</td><td class='rank'>3</td></tr>
+<tr><td class='text'>Confections</td><td class='text'>Tarte au sucre</td><td class='num'>47,234.97</td><td class='rank'>1</td></tr>
+<tr><td class='text'>Confections</td><td class='text'>Sir Rodney's Marmalade</td><td class='num'>22,563.36</td><td class='rank'>2</td></tr>
+<tr><td class='text'>Confections</td><td class='text'>Gumbär Gummibärchen</td><td class='num'>19,849.14</td><td class='rank'>3</td></tr>
+<tr><td class='text'>Dairy Products</td><td class='text'>Raclette Courdavault</td><td class='num'>71,155.70</td><td class='rank'>1</td></tr>
+<tr><td class='text'>Dairy Products</td><td class='text'>Camembert Pierrot</td><td class='num'>46,825.48</td><td class='rank'>2</td></tr>
+<tr><td class='text'>Dairy Products</td><td class='text'>Mozzarella di Giovanni</td><td class='num'>24,900.13</td><td class='rank'>3</td></tr>
+<tr><td class='text'>Grains/Cereals</td><td class='text'>Gnocchi di nonna Alice</td><td class='num'>42,593.06</td><td class='rank'>1</td></tr>
+<tr><td class='text'>Grains/Cereals</td><td class='text'>Wimmers gute Semmelknödel</td><td class='num'>21,957.97</td><td class='rank'>2</td></tr>
+<tr><td class='text'>Grains/Cereals</td><td class='text'>Singaporean Hokkien Fried Mee</td><td class='num'>8,575</td><td class='rank'>3</td></tr>
+<tr><td class='text'>Meat/Poultry</td><td class='text'>Thüringer Rostbratwurst</td><td class='num'>80,368.67</td><td class='rank'>1</td></tr>
+<tr><td class='text'>Meat/Poultry</td><td class='text'>Alice Mutton</td><td class='num'>32,698.38</td><td class='rank'>2</td></tr>
+<tr><td class='text'>Meat/Poultry</td><td class='text'>Perth Pasties</td><td class='num'>20,574.17</td><td class='rank'>3</td></tr>
+<tr><td class='text'>Produce</td><td class='text'>Manjimup Dried Apples</td><td class='num'>41,819.65</td><td class='rank'>1</td></tr>
+<tr><td class='text'>Produce</td><td class='text'>Rössle Sauerkraut</td><td class='num'>25,696.64</td><td class='rank'>2</td></tr>
+<tr><td class='text'>Produce</td><td class='text'>Uncle Bob's Organic Dried Pears</td><td class='num'>22,044.30</td><td class='rank'>3</td></tr>
+<tr><td class='text'>Seafood</td><td class='text'>Carnarvon Tigers</td><td class='num'>29,171.87</td><td class='rank'>1</td></tr>
+<tr><td class='text'>Seafood</td><td class='text'>Ikura</td><td class='num'>20,867.34</td><td class='rank'>2</td></tr>
+<tr><td class='text'>Seafood</td><td class='text'>Boston Crab Meat</td><td class='num'>17,910.63</td><td class='rank'>3</td></tr>
+</tbody>
+      </table>
+    </div>
+    
+</body>
+</html>

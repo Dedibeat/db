@@ -1,0 +1,19 @@
+{
+  "files.associations": {
+    "*.sql": "sql"
+  },
+  "sqltools.useNodeRuntime": true,
+  "sqltools.connections": [
+    {
+      "name": "Lab 1 Northwind",
+      "group": "Course databases",
+      "driver": "PostgreSQL",
+      "server": "/var/run/postgresql",
+      "port": 5432,
+      "database": "northwind",
+      "username": "dedibeat",
+      "password": "",
+      "previewLimit": 100
+    }
+  ]
+}

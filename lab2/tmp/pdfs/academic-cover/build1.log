@@ -1,0 +1,273 @@
+This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023/Debian) (preloaded format=xelatex)
+ restricted \write18 enabled.
+entering extended mode
+(./output/report/lab2_report.tex
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-01-22>
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2023/05/17 v1.4n Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size11.clo))
+(/usr/share/texlive/texmf-dist/tex/latex/fontspec/fontspec.sty
+(/usr/share/texlive/texmf-dist/tex/latex/l3packages/xparse/xparse.sty
+(/usr/share/texlive/texmf-dist/tex/latex/l3kernel/expl3.sty
+(/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-xetex.def)))
+(/usr/share/texlive/texmf-dist/tex/latex/fontspec/fontspec-xetex.sty
+(/usr/share/texlive/texmf-dist/tex/latex/base/fontenc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/fontspec/fontspec.cfg)))
+(/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/ifvtex.sty
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/iftex.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/xetex.def)))
+(/usr/share/texlive/texmf-dist/tex/latex/xcolor/xcolor.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/mathcolor.ltx))
+(/usr/share/texlive/texmf-dist/tex/latex/listings/listings.sty
+(/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/listings/listings.cfg))
+(/usr/share/texlive/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/titlesec/titlesec.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/tocloft/tocloft.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/share/texlive/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+(/usr/share/texlive/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/usr/share/texlive/texmf-dist/tex/generic/infwarerr/infwarerr.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/auxhook/auxhook.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+(/usr/share/texlive/texmf-dist/tex/latex/kvoptions/kvoptions.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/usr/share/texlive/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/puenc.def)
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/bitset/bitset.sty
+(/usr/share/texlive/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/base/atbegshi-ltx.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hxetex.def
+(/usr/share/texlive/texmf-dist/tex/generic/stringenc/stringenc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(/usr/share/texlive/texmf-dist/tex/latex/base/atveryend-ltx.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption.sty
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption3.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype.sty
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype-xetex.def)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype.cfg))
+(/usr/share/texlive/texmf-dist/tex/latex/tools/array.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/lastpage/lastpage.sty
+(/usr/share/texlive/texmf-dist/tex/latex/lastpage/lastpage2e.sty
+(/usr/share/texlive/texmf-dist/tex/latex/lastpage/lastpagemodern.sty) 
+)) (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty)
+No file lab2_report.aux.
+(/usr/share/texlive/texmf-dist/tex/latex/base/ts1cmr.fd)
+*geometry* driver: auto-detecting
+*geometry* detected driver: xetex
+
+Package hyperref Warning: Rerun to get /PageLabels entry.
+
+
+LaTeX Font Warning: Font shape `OML/cmm/m/it' in size <5.5> not available
+(Font)              size <5> substituted on input line 106.
+
+
+LaTeX Font Warning: Font shape `OMS/cmsy/m/n' in size <5.5> not available
+(Font)              size <5> substituted on input line 106.
+
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-cmr.cfg)
+
+LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <5.5> not available
+(Font)              size <5> substituted on input line 106.
+
+[1]
+No file lab2_report.toc.
+
+LaTeX Warning: Reference `LastPage' on page 2 undefined on input line 124.
+
+[2] (./lab.sql)
+
+LaTeX Warning: Reference `LastPage' on page 3 undefined on input line 132.
+
+[3]
+
+LaTeX Warning: Reference `LastPage' on page 4 undefined on input line 134.
+
+[4]
+Underfull \hbox (badness 2418) in paragraph at lines 137--138
+\TU/DejaVuSansMono(0)/m/n/10.95 v_customer_sales \TU/DejaVuSans(0)/m/n/10.95 ха
+рагдац нь харилцагч бүрийн захиалгын тоо, нийт орлого,
+
+Underfull \hbox (badness 1831) in paragraph at lines 137--138
+\TU/DejaVuSans(0)/m/n/10.95 захиалгын дундаж дүн болон сүүлийн захиалгын огноог
+ нэг мөрөөр харуулна.
+(./lab.sql)
+
+LaTeX Warning: Reference `LastPage' on page 5 undefined on input line 142.
+
+[5]
+
+LaTeX Warning: Reference `LastPage' on page 6 undefined on input line 144.
+
+[6] (./lab.sql)
+
+LaTeX Warning: Reference `LastPage' on page 7 undefined on input line 152.
+
+[7]
+
+LaTeX Warning: Reference `LastPage' on page 8 undefined on input line 154.
+
+[8] (./lab.sql)
+
+LaTeX Warning: Reference `LastPage' on page 9 undefined on input line 162.
+
+[9]
+
+LaTeX Warning: Reference `LastPage' on page 10 undefined on input line 164.
+
+[10]
+Underfull \hbox (badness 1701) in paragraph at lines 167--168
+\TU/DejaVuSans(0)/m/n/10.95 Энэ нь нэг хүснэгтийн шууд багануудаас бүрдсэн тул 
+харагдацын бүх багана
+(./lab.sql
+
+LaTeX Warning: Reference `LastPage' on page 11 undefined on input line 174.
+
+[11])
+Underfull \hbox (badness 1540) in paragraph at lines 174--175
+\TU/DejaVuSans(0)/m/n/10.95 Бүх багана эх хүснэгтээс шууд сонгогдсон тул шинэчл
+эгдэх боломжтой. Нэр,
+
+LaTeX Warning: Reference `LastPage' on page 12 undefined on input line 178.
+
+[12]
+
+LaTeX Warning: Reference `LastPage' on page 13 undefined on input line 194.
+
+[13]
+
+LaTeX Warning: Reference `LastPage' on page 14 undefined on input line 196.
+
+[14]
+Underfull \hbox (badness 4108) in paragraph at lines 199--200
+\TU/DejaVuSansMono(0)/m/n/10.95 mv_monthly_sales \TU/DejaVuSans(0)/m/n/10.95 ма
+териалчлагдсан харагдац нь улс болон жил-сараар нийт
+
+Underfull \hbox (badness 1043) in paragraph at lines 199--200
+\TU/DejaVuSans(0)/m/n/10.95 орлого, захиалгын тоог урьдчилан тооцож хадгална. \
+TU/DejaVuSansMono(0)/m/n/10.95 year_month, country \TU/DejaVuSans(0)/m/n/10.95 
+хос
+(./lab.sql)
+
+LaTeX Warning: Reference `LastPage' on page 15 undefined on input line 206.
+
+[15]
+
+LaTeX Warning: Reference `LastPage' on page 16 undefined on input line 208.
+
+[16]
+Underfull \hbox (badness 2293) in paragraph at lines 211--212
+\TU/DejaVuSans(0)/m/n/10.95 ийн оронд 0 харуулна. Дараагийн асуулга \TU/DejaVuS
+ansMono(0)/m/n/10.95 LATERAL VALUES \TU/DejaVuSans(0)/m/n/10.95 ашиглан хамгийн
+
+(./lab.sql
+
+LaTeX Warning: Reference `LastPage' on page 17 undefined on input line 258.
+
+[17])
+
+LaTeX Warning: Reference `LastPage' on page 18 undefined on input line 216.
+
+[18]
+
+LaTeX Warning: Reference `LastPage' on page 19 undefined on input line 218.
+
+[19]
+Underfull \hbox (badness 3954) in paragraph at lines 221--222
+\TU/DejaVuSans(0)/m/n/10.95 Эхний \TU/DejaVuSansMono(0)/m/n/10.95 v_order_lines
+ \TU/DejaVuSans(0)/m/n/10.95 харагдац захиалгын мөр бүрийн дүнг тооцно. Үүнээс
+
+Underfull \hbox (badness 2503) in paragraph at lines 221--222
+\TU/DejaVuSans(0)/m/n/10.95 Өөрчлөлтийн дүнгээр өсөхөөр эрэмбэлж эхний мөрийг с
+онгосноор хамгийн их
+(./lab.sql
+
+LaTeX Warning: Reference `LastPage' on page 20 undefined on input line 339.
+
+[20])
+
+LaTeX Warning: Reference `LastPage' on page 21 undefined on input line 226.
+
+[21]
+
+LaTeX Warning: Reference `LastPage' on page 22 undefined on input line 228.
+
+[22]
+Underfull \hbox (badness 1331) in paragraph at lines 231--232
+\TU/DejaVuSans(0)/m/n/10.95 болон зөвхөн хоцорсон хүргэлтийн дундаж өдрийг тооц
+оолж, хамгийн муугаас
+(./lab.sql)
+
+LaTeX Warning: Reference `LastPage' on page 23 undefined on input line 236.
+
+[23]
+
+LaTeX Warning: Reference `LastPage' on page 24 undefined on input line 238.
+
+[24]
+Underfull \hbox (badness 4713) in paragraph at lines 241--242
+\TU/DejaVuSansMono(0)/m/n/10.95 v_product_inventory_status \TU/DejaVuSans(0)/m/
+n/10.95 харагдац нь бүтээгдэхүүн, нийлүүлэгч, ангиллын
+
+Underfull \hbox (badness 1552) in paragraph at lines 241--242
+\TU/DejaVuSans(0)/m/n/10.95 үлдэгдэл бага бол \TU/DejaVuSansMono(0)/m/n/10.95 L
+ow\TU/DejaVuSans(0)/m/n/10.95 , бусад үед \TU/DejaVuSansMono(0)/m/n/10.95 OK \T
+U/DejaVuSans(0)/m/n/10.95 төлөв өгнө. Захиалгад орохоо больсон
+(./lab.sql)
+
+LaTeX Warning: Reference `LastPage' on page 25 undefined on input line 247.
+
+[25]
+Underfull \hbox (badness 1783) in paragraph at lines 253--253
+\TU/DejaVuSans(0)/m/n/10 Идэвхтэй бүтээгдэхүүн бүрийн нийлүүлэгч, ангилал, нөөц
+ийн тоо, нөөцийн үнэ болон
+
+LaTeX Warning: Reference `LastPage' on page 26 undefined on input line 255.
+
+[26]
+
+LaTeX Warning: Reference `LastPage' on page 27 undefined on input line 257.
+
+[27] 
+enddocument/afterlastpage: lastpage setting LastPage.
+(tmp/pdfs/academic-cover/lab2_report.aux)
+
+LaTeX Font Warning: Size substitutions with differences
+(Font)              up to 0.5pt have occurred.
+
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `lab2_report.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+
+Package lastpage Warning: Rerun to get the references right on input line 257.
+
+ )
+(see the transcript file for additional information)
+Output written on tmp/pdfs/academic-cover/lab2_report.pdf (27 pages).
+Transcript written on tmp/pdfs/academic-cover/lab2_report.log.

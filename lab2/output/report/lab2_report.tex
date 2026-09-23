@@ -1,0 +1,262 @@
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\setmonofont{DejaVu Sans Mono}
+\usepackage[letterpaper,left=0.8in,right=0.8in,top=0.65in,bottom=0.65in,headheight=14pt,footskip=22pt]{geometry}
+\usepackage{graphicx}
+\usepackage[export]{adjustbox}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage[hidelinks]{hyperref}
+\usepackage{caption}
+\usepackage{microtype}
+\usepackage{array}
+\usepackage{lastpage}
+
+\definecolor{sqlblue}{HTML}{214F73}
+\definecolor{softgray}{HTML}{F1F5F8}
+\definecolor{captiongray}{HTML}{444444}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[R]{\color{captiongray}\small Харагдац даалгавар 2\hspace{1em}\thepage\ / \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\titleformat{\section}[display]
+  {\normalfont\bfseries\color{black}\raggedright}
+  {\fontsize{9.5}{11}\selectfont Дасгал \thesection}
+  {1pt}
+  {\fontsize{14}{17}\selectfont}
+\titlespacing*{\section}{0pt}{0pt}{5pt}
+
+\titleformat{\subsection}{\normalfont\bfseries\fontsize{10.5}{13}\selectfont}{}{0pt}{}
+\titlespacing*{\subsection}{0pt}{5pt}{2pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3.5pt}
+\setlength{\emergencystretch}{4em}
+\renewcommand{\baselinestretch}{1.06}
+\setlength{\cftbeforesecskip}{4pt}
+\renewcommand{\cftsecfont}{\normalfont}
+\renewcommand{\cftsecpagefont}{\normalfont}
+\renewcommand{\contentsname}{Агуулга}
+
+\lstdefinestyle{sqlstyle}{
+  language=SQL,
+  basicstyle=\ttfamily\fontsize{8.5}{10.0}\selectfont,
+  keywordstyle=\color{sqlblue}\bfseries,
+  commentstyle=\color{captiongray},
+  stringstyle=\color{black},
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=false,
+  columns=fullflexible,
+  keepspaces=true,
+  frame=none,
+  numbers=none,
+  xleftmargin=0.05in,
+  aboveskip=2pt,
+  belowskip=2pt,
+  tabsize=4,
+  morekeywords={RECURSIVE,MATERIALIZED,CONCURRENTLY,FILTER,LATERAL,DATE_TRUNC,NULLIF,DISCONTINUED}
+}
+\lstset{style=sqlstyle}
+
+\newcommand{\sqlresult}[3][0.30\textheight]{%
+  \begin{center}
+    \vspace{2pt}
+    \includegraphics[width=\textwidth,max height=#1,keepaspectratio]{#2}
+    \vspace{3pt}
+    \par{\small\color{captiongray}#3\par}
+    \vspace{2pt}
+  \end{center}
+}
+
+\begin{document}
+\sloppy
+
+\begin{titlepage}
+  \thispagestyle{empty}
+  \setlength{\parskip}{0pt}
+  \centering
+  \vspace*{24pt}
+  {\bfseries\fontsize{11}{17}\selectfont
+    МЭДЭЭЛЛИЙН ТЕХНОЛОГИ,\par
+    КОМПЬЮТЕРЫН УХААНЫ ТЭНХИМ\par}
+
+  \vspace{90pt}
+  {\bfseries\fontsize{14}{20}\selectfont ӨГӨГДЛИЙН САН\par}
+  \vspace{18pt}
+  {\bfseries\fontsize{18}{24}\selectfont ЛАБОРАТОРИЙН АЖЛЫН ТАЙЛАН\par}
+  \vspace{8pt}
+  {\fontsize{12}{18}\selectfont Лабораторийн ажил № 2\par}
+  \vspace{20pt}
+  {\fontsize{14}{20}\selectfont Сэдэв: Харагдац (View)\par}
+  \vspace{6pt}
+  {\fontsize{11}{16}\selectfont Northwind өгөгдлийн сан\par}
+
+  \vspace{60pt}
+  {\fontsize{11}{16}\selectfont
+    \renewcommand{\arraystretch}{1.5}
+    \begin{tabular}{@{}>{\raggedright\arraybackslash}p{1.1in}@{\hspace{14pt}}>{\raggedright\arraybackslash}p{3.55in}@{}}
+      Гүйцэтгэсэн: & Дугаржанцан Билгүүн \\
+      SISI дугаар: & 23B1NUM1470 \\
+      Хөтөлбөр: & Компьютерын ухааны хөтөлбөр
+    \end{tabular}\par}
+
+  \vfill
+  {\fontsize{11}{16}\selectfont
+    Улаанбаатар хот\par
+    \vspace{4pt}
+    2026 он\par}
+  \vspace*{16pt}
+\end{titlepage}
+
+\setcounter{page}{2}
+\tableofcontents
+\thispagestyle{fancy}
+
+\clearpage
+\section{Хамгийн их дүнтэй 10 захиалга}
+
+Захиалга бүрийн мөрүүдийг нэгтгэн нийт дүнг тооцоолсон \texttt{v\_order\_totals} харагдац үүсгэв. Үүний дараа нийт дүнгээр буурах дарааллаар эрэмбэлж эхний 10 захиалгыг сонгов.
+
+\subsection*{SQL асуулга}
+\lstinputlisting[firstline=6,lastline=20]{lab.sql}
+
+\subsection*{Асуулгын үр дүн}
+\sqlresult[0.34\textheight]{output/ss/Screenshot from 2026-09-18 20-34-18.png}{Зураг 1.1: Хамгийн өндөр дүнтэй 10 захиалга буурах дарааллаар харагдав. Тэргүүн байрт 10865 дугаартай захиалга 16,387.50 дүнгээр шалгарсан.}
+
+\clearpage
+\section{Захиалгын дундаж дүн өндөртэй харилцагчид}
+
+\texttt{v\_customer\_sales} харагдац нь харилцагч бүрийн захиалгын тоо, нийт орлого, захиалгын дундаж дүн болон сүүлийн захиалгын огноог нэг мөрөөр харуулна. \texttt{LEFT JOIN} болон \texttt{COALESCE} ашигласнаар захиалгагүй харилцагчийн орлого 0 байна. Эцсийн асуулга нь захиалгын дундаж нь бүх захиалгын ерөнхий дунджаас өндөр харилцагчдыг шүүнэ.
+
+\subsection*{SQL асуулга}
+\lstinputlisting[firstline=27,lastline=46]{lab.sql}
+
+\subsection*{Асуулгын үр дүн}
+\sqlresult[0.34\textheight]{output/ss/ex2_full.png}{Зураг 2.1: Шүүлтийн үр дүнд нийт 22 харилцагч гарсан. Захиалгын дундаж дүнгээр QUICK-Stop (3,938.48), Ernst Handel (3,495.83) тэргүүлж байна.}
+
+\clearpage
+\section{Ангилал бүрийн шилдэг борлуулалттай 3 бүтээгдэхүүн}
+
+Бүтээгдэхүүн бүрийн борлуулалтын дүнг эхлээд нэгтгэж, дараа нь \texttt{RANK()} цонхны функцийг ангилал тус бүрээр (\texttt{PARTITION BY category\_id}) ажиллуулав. Эцсийн асуулга нь \texttt{sales\_rank <= 3} нөхцөлөөр ангилал бүрийн шилдэг 3 бүтээгдэхүүнийг харуулна.
+
+\subsection*{SQL асуулга}
+\lstinputlisting[firstline=53,lastline=86]{lab.sql}
+
+\clearpage
+\subsection*{Асуулгын үр дүн}
+\sqlresult[0.76\textheight]{output/ss/Screenshot from 2026-09-18 20-36-37.png}{Зураг 3.1: 8 ангилал тус бүрийн шилдэг 3 бүтээгдэхүүн (нийт 24 мөр). Тухайлбал Beverages ангиллыг Côte de Blaye бүтээгдэхүүн 141,396.74 дүнгээр тэргүүлсэн.}
+
+\clearpage
+\section{Рекурсив CTE ашигласан ажилтны шатлал}
+
+Менежергүй ажилтныг (\texttt{reports\_to IS NULL}) суурь мөр болгож, \texttt{employees.reports\_to} холбоосоор доод түвшний ажилтнуудыг рекурсив байдлаар нэмэв. Харагдац нь ажилтан, менежер, шатлалын гүн болон эх ажилтнаас тухайн ажилтан хүртэлх замыг бүтэн харуулна.
+
+\subsection*{SQL асуулга}
+\lstinputlisting[firstline=93,lastline=124]{lab.sql}
+
+\subsection*{Асуулгын үр дүн}
+\sqlresult[0.26\textheight]{output/ss/ex4_hierarchy_cropped.png}{Зураг 4.1: Andrew Fuller нь 0-р түвшний ерөнхий удирдлага байна. Түүнд шууд тайлагнадаг ажилтнууд 1-р түвшинд, Steven Buchanan-аар дамжин тайлагнадаг ажилтнууд 2-р түвшинд гарсан.}
+
+\clearpage
+\section{CHECK OPTION бүхий шинэчлэгдэх боломжтой харагдац}
+
+\texttt{v\_active\_products} харагдац нь зөвхөн \texttt{discontinued = 0} бүтээгдэхүүнийг харуулна. Энэ нь нэг хүснэгтийн шууд багануудаас бүрдсэн тул харагдацын бүх багана техникийн хувьд шинэчлэгдэх боломжтой. \texttt{WITH CHECK OPTION} нь харагдацаар дамжуулан хийгдэх аливаа \texttt{INSERT} болон \texttt{UPDATE} үйлдлийн дараа тухайн мөр харагдацын \texttt{WHERE} нөхцөлийг заавал хангасан байхыг хатуу шаарддаг.
+
+\subsection*{SQL асуулга}
+\lstinputlisting[firstline=131,lastline=174]{lab.sql}
+
+\subsection*{Баганын шинэчлэгдэх нөхцөл}
+
+Бүх багана эх хүснэгтээс шууд сонгогдсон тул шинэчлэгдэх боломжтой. \texttt{product\_id} нь давхардахгүй байх ёстой бөгөөд \texttt{supplier\_id}, \texttt{category\_id} нь гадаад түлхүүрийн шаардлагыг хангана. \texttt{discontinued} баганыг 0 хэвээр шинэчилж болох боловч 1 болгохыг \texttt{WITH CHECK OPTION} хориглодог.
+
+\clearpage
+\subsection*{Туршилт 1: Амжилттай INSERT ба UPDATE}
+\sqlresult[0.24\textheight]{output/ss/Screenshot from 2026-09-18 21-08-50.png}{Зураг 5.1: Транзакцийн хүрээнд \texttt{discontinued = 0} нөхцөлийг хангасан шинэ бүтээгдэхүүн (ID: 32000) нэмэгдэж, үнэ нь 12.00 болж шинэчлэгдсэнийг баталгаажуулав.}
+
+\subsection*{Туршилт 2: WITH CHECK OPTION зөрчлийн алдаа}
+\sqlresult[0.34\textheight]{output/ss/ex5_error_cropped.png}{Зураг 5.2: \texttt{discontinued = 1} болгох шинэчлэлт нь харагдацын нөхцөлийг зөрчих тул PostgreSQL алдаа заан үйлдлийг цуцалсан байдал.}
+
+\clearpage
+\section{Материалчлагдсан сарын борлуулалтын харагдац}
+
+\texttt{mv\_monthly\_sales} материалчлагдсан харагдац нь улс болон жил-сараар нийт орлого, захиалгын тоог урьдчилан тооцож хадгална. \texttt{year\_month, country} хос баганад unique индекс үүсгэснээр \texttt{REFRESH MATERIALIZED VIEW CONCURRENTLY} командыг ажиллуулж, унших үйлдлийг хаахгүйгээр өгөгдлийг шинэчлэх боломжтой.
+
+Энэ төрлийн харагдац нь өгөгдөл цөөн шинэчлэгддэг боловч тайлан олон дахин уншигддаг системд асар өндөр хурдны давуу тал олгодог.
+
+\subsection*{SQL асуулга}
+\lstinputlisting[firstline=180,lastline=202]{lab.sql}
+
+\clearpage
+\subsection*{Асуулгын үр дүн}
+\sqlresult[0.72\textheight]{output/ss/Screenshot from 2026-09-18 20-51-55.png}{Зураг 6.1: Улс ба сарын түвшинд урьдчилан тооцоолж хадгалсан борлуулалтын үр дүн (1996 оны 7-р сараас эхэлсэн хэсэг).}
+
+\clearpage
+\section{Нөхцөлт агрегат ашигласан пивот харагдац}
+
+\texttt{SUM(CASE WHEN ...)} нөхцөлт агрегатаар бүтээгдэхүүний 8 ангиллыг тусдаа багана болгон хувиргаж пивот хийв. Дараагийн асуулга нь \texttt{LATERAL VALUES} ашиглан нийт орлогын 50-иас дээш хувийг нэг ангиллаас олдог харилцагчдыг шүүнэ.
+
+\subsection*{Пивот харагдац үүсгэх ба хэвлэх SQL}
+\lstinputlisting[firstline=209,lastline=251]{lab.sql}
+
+\clearpage
+\subsection*{Пивот хүснэгтийн үр дүн}
+\sqlresult[0.38\textheight]{output/ss/ex7_pivot.png}{Зураг 7.1: Бүх харилцагчийн орлогыг бүтээгдэхүүний 8 ангиллаар багана болгон задалсан пивот хүснэгтийн үр дүн.}
+
+\subsection*{Давамгай ангиллыг шүүх SQL}
+\lstinputlisting[firstline=254,lastline=275]{lab.sql}
+
+\clearpage
+\subsection*{Давамгай ангиллын шүүлтийн үр дүн}
+\sqlresult[0.70\textheight]{output/ss/Screenshot from 2026-09-18 20-52-30.png}{Зураг 7.2: Нийт орлогын 50\%-иас дээш хувийг нэг ангиллаас олдог 18 харилцагчийн жагсаалт.}
+
+\clearpage
+\section{Харагдац ашигласан харагдац ба сарын өөрчлөлт}
+
+Эхний \texttt{v\_order\_lines} харагдац захиалгын мөр бүрийн дүнг тооцно. Үүн дээр суурилсан \texttt{v\_category\_monthly} нь сарын орлогыг нэгтгэж, гурав дахь \texttt{v\_category\_monthly\_change} харагдац \texttt{LAG()} ашиглан сар тутмын өөрчлөлтийг тооцоолно.
+
+\subsection*{Харагдацууд үүсгэх SQL}
+\lstinputlisting[firstline=281,lastline=330]{lab.sql}
+
+\clearpage
+\subsection*{Хамгийн их бууралтыг олох SQL}
+\lstinputlisting[firstline=332,lastline=342]{lab.sql}
+
+\subsection*{Асуулгын үр дүн}
+\sqlresult[0.25\textheight]{output/ss/Screenshot from 2026-09-18 20-53-00.png}{Зураг 8.1: 1998 оны 5-р сард Dairy Products ангиллын орлого 98.19\% (-34,051.78) буурсан нь хамгийн өндөр сарын бууралт байв.}
+
+\clearpage
+\section{Хожимдсон хүргэлтийн шинжилгээ}
+
+\texttt{CASE} илэрхийллээр хүргэлт бүрийг ангилж, хүргэгдсэн захиалгуудаас тээвэрлэгч бүрийн хоцролтын хувь болон хоцорсон хүргэлтийн дундаж өдрийг тооцоолов.
+
+\subsection*{SQL асуулга}
+\lstinputlisting[firstline=349,lastline=379]{lab.sql}
+
+\subsection*{Асуулгын үр дүн}
+\sqlresult[0.28\textheight]{output/ss/ex9_shipment_cropped.png}{Зураг 9.1: United Package 5.08\% хоцролтоор хамгийн муу үзүүлэлт үзүүлсэн бол Speedy Express-ийн дундаж хоцролт 8.08 өдөр байв.}
+
+\clearpage
+\section{Бараа материалын төлөвийн харагдац}
+
+\texttt{v\_product\_inventory\_status} харагдац нь барааны нөөц, захиалга дахь тоо болон дахин захиалах түвшинг харьцуулан \texttt{Reorder needed}, \texttt{Low}, \texttt{OK} төлөвийг тодорхойлно.
+
+\subsection*{SQL асуулга}
+\lstinputlisting[firstline=386,lastline=435]{lab.sql}
+
+\clearpage
+\subsection*{Бүтээгдэхүүний төлөвийн үр дүн}
+\sqlresult[0.48\textheight]{output/ss/ex10_inventory_cropped.png}{Зураг 10.1: Идэвхтэй бүтээгдэхүүн бүрийн үнэ, үлдэгдэл болон тооцоолсон нөөцийн төлөв.}
+
+\subsection*{Дахин захиалах нийлүүлэгчдийн хураангуй}
+\sqlresult[0.26\textheight]{output/ss/ex10_supplier_cropped.png}{Зураг 10.2: Дахин захиалах шаардлагатай бүтээгдэхүүнтэй хоёр нийлүүлэгчийн хураангуй мэдээлэл.}
+
+\end{document}

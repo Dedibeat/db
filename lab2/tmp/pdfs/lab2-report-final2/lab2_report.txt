@@ -1,0 +1,773 @@
+             Харагдац даалгавар 2
+             Northwind өгөгдлийн сангийн лабораторийн ажил
+
+
+
+
+Агуулга
+
+
+Агуулга
+
+1 Хамгийн их дүнтэй 10 захиалга                               2
+
+2 Ерөнхий дундажаас өндөр дүнтэй захиалгууд                   4
+
+3 Ангилал бүрийн шилдэг борлуулалттай 3 бүтээгдэхүүн          6
+
+4 Рекурсив CTE ашигласан ажилтны шатлал                       8
+
+5 CHECK OPTION бүхий шинэчлэгдэх боломжтой харагдац          10
+
+6 Материалчлагдсан сарын борлуулалтын харагдац               14
+
+7 Нөхцөлт агрегат ашигласан пивот харагдац                   16
+
+8 Харагдац ашигласан харагдац ба сарын өөрчлөлт              19
+
+9 Хожимдсон хүргэлтийн шинжилгээ                             22
+
+10 Бараа материалын төлөвийн харагдац                        24
+Дасгал 1
+
+
+Хамгийн их дүнтэй 10 захиалга
+
+Захиалга бүрийн мөрүүдийг нэгтгэн нийт дүнг тооцоолсон v_order_totals харагдац
+үүсгэв. Үүний дараа нийт дүнгээр буурах дарааллаар эрэмбэлж эхний 10 захиалгыг
+сонгов.
+
+
+SQL асуулга
+CREATE OR REPLACE VIEW v_order_totals AS
+SELECT
+    o.order_id,
+    o.customer_id,
+    o.order_date,
+    SUM((od.unit_price * od.quantity * (1 - od.discount))::numeric) AS order_total
+FROM orders AS o
+JOIN order_details AS od ON od.order_id = o.order_id
+GROUP BY o.order_id, o.customer_id, o.order_date;
+
+SELECT order_id, customer_id, order_date,
+       ROUND(order_total, 2) AS order_total
+FROM v_order_totals
+ORDER BY order_total DESC, order_id
+LIMIT 10;
+
+
+
+
+                                                                 Харагдац даалгавар 2   2 / 26
+Дасгал 1 Асуулгын үр дүн
+
+
+
+
+Хамгийн өндөр дүнтэй 10 захиалга буурах дарааллаар харагдав.   Хамгийн өндөр дүнтэй
+захиалга нь 10865 дугаартай бөгөөд нийт дүн 16387.50 байна.
+
+
+
+
+                                                        Харагдац даалгавар 2   3 / 26
+Дасгал 2
+
+
+Ерөнхий дундажаас өндөр дүнтэй захиалгууд
+
+v_customer_sales харагдац нь харилцагч бүрийн захиалгын тоо, нийт орлого,
+захиалгын дундаж дүн болон сүүлийн захиалгын огноог нэг мөрөөр харуулна.
+LEFT JOIN болон COALESCE ашигласнаар захиалгагүй харилцагчийн орлого 0 байна.
+Эцсийн асуулга нь захиалгын дундаж нь бүх захиалгын ерөнхий дунджаас өндөр
+харилцагчдыг шүүнэ.
+
+
+SQL асуулга
+CREATE OR REPLACE VIEW v_customer_sales AS
+SELECT
+    c.customer_id,
+    c.company_name,
+    c.country,
+    COUNT(vot.order_id) AS order_count,
+    COALESCE(SUM(vot.order_total), 0::numeric) AS total_revenue,
+    COALESCE(AVG(vot.order_total), 0::numeric) AS average_order_value,
+    MAX(vot.order_date) AS last_order_date
+FROM customers AS c
+LEFT JOIN v_order_totals AS vot ON vot.customer_id = c.customer_id
+GROUP BY c.customer_id, c.company_name, c.country;
+
+SELECT customer_id, company_name, country, order_count,
+       ROUND(total_revenue, 2) AS total_revenue,
+       ROUND(average_order_value, 2) AS average_order_value,
+       last_order_date
+FROM v_customer_sales
+WHERE average_order_value > (SELECT AVG(order_total) FROM v_order_totals)
+ORDER BY average_order_value DESC, customer_id;
+
+
+
+
+                                                                 Харагдац даалгавар 2   4 / 26
+Дасгал 2 Асуулгын үр дүн
+
+
+
+
+Шүүлтийн үр дүнд 22 харилцагч гарсан. QUICK-Stop харилцагчийн нийт орлого 110277.31,
+захиалгын тоо 28 байсан бөгөөд дундаж захиалгын дүнгээр жагсаалтыг тэргүүлэв.
+
+
+
+
+                                                         Харагдац даалгавар 2   5 / 26
+Дасгал 3
+
+
+Ангилал бүрийн шилдэг борлуулалттай 3
+бүтээгдэхүүн
+
+Бүтээгдэхүүн бүрийн борлуулалтын дүнг эхлээд нэгтгэж, дараа нь RANK() функцийг
+ангилал тус бүрээр ажиллуулав. Эцсийн асуулга нь sales_rank <= 3 нөхцөлөөр
+ангилал бүрийн эхний гурван бүтээгдэхүүнийг харуулна.
+
+
+SQL асуулга
+CREATE OR REPLACE VIEW v_product_category_rank AS
+WITH product_sales AS (
+    SELECT
+        c.category_id,
+        c.category_name,
+        p.product_id,
+        p.product_name,
+        COALESCE(
+            SUM((od.unit_price * od.quantity * (1 - od.discount))::numeric),
+            0::numeric
+        ) AS total_sales
+    FROM categories AS c
+    JOIN products AS p ON p.category_id = c.category_id
+    LEFT JOIN order_details AS od ON od.product_id = p.product_id
+    GROUP BY c.category_id, c.category_name, p.product_id, p.product_name
+)
+SELECT
+    category_id,
+    category_name,
+    product_id,
+    product_name,
+    total_sales,
+    RANK() OVER (
+        PARTITION BY category_id
+        ORDER BY total_sales DESC
+    ) AS sales_rank
+FROM product_sales;
+
+SELECT category_name, product_name,
+       ROUND(total_sales, 2) AS total_sales,
+       sales_rank
+FROM v_product_category_rank
+WHERE sales_rank <= 3
+ORDER BY category_name, sales_rank, product_name;
+
+
+
+
+                                                                 Харагдац даалгавар 2   6 / 26
+Дасгал 3 Асуулгын үр дүн
+
+
+
+
+Найман ангилал тус бүрээс хамгийн өндөр борлуулалттай гурван бүтээгдэхүүн, нийт 24
+мөр гарсан. Жишээлбэл Beverages ангиллыг Côte de Blaye бүтээгдэхүүн 141396.74 дүнгээр
+тэргүүлэв.
+
+
+
+
+                                                          Харагдац даалгавар 2   7 / 26
+Дасгал 4
+
+
+Рекурсив CTE ашигласан ажилтны шатлал
+
+Менежергүй ажилтныг суурь мөр болгож, employees.reports_to холбоосоор доод
+түвшний ажилтнуудыг рекурсив байдлаар нэмэв. Харагдац нь ажилтан, менежер,
+шатлалын гүн болон эх ажилтнаас тухайн ажилтан хүртэлх замыг хадгална.
+
+
+SQL асуулга
+CREATE OR REPLACE VIEW v_employee_hierarchy AS
+WITH RECURSIVE hierarchy AS (
+    -- Root employee: no manager
+    SELECT
+        e.employee_id,
+        CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
+        e.reports_to AS manager_id,
+        NULL::text AS manager_name,
+        0 AS depth,
+        CONCAT(e.first_name, ' ', e.last_name)::text AS path
+    FROM employees AS e
+    WHERE e.reports_to IS NULL
+
+    UNION ALL
+
+    -- Add employees who report to the current level
+    SELECT
+        e.employee_id,
+        CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
+        e.reports_to AS manager_id,
+        h.employee_name AS manager_name,
+        h.depth + 1 AS depth,
+        (h.path || ' > ' || CONCAT(e.first_name, ' ', e.last_name))::text AS path
+    FROM employees AS e
+    JOIN hierarchy AS h ON e.reports_to = h.employee_id
+)
+SELECT employee_id, employee_name, manager_id, manager_name, depth, path
+FROM hierarchy;
+
+SELECT *
+FROM v_employee_hierarchy
+ORDER BY depth, employee_id;
+
+
+
+
+                                                                   Харагдац даалгавар 2   8 / 26
+Дасгал 4 Асуулгын үр дүн
+
+
+
+
+Andrew Fuller нь 0-р түвшний үндсэн удирдлага байна. Түүнд шууд тайлагнадаг ажилтнууд
+1-р түвшинд, Steven Buchanan-аар дамжин тайлагнадаг ажилтнууд 2-р түвшинд гарсан.
+
+
+
+
+                                                          Харагдац даалгавар 2   9 / 26
+Дасгал 5
+
+
+CHECK OPTION бүхий шинэчлэгдэх боломжтой
+харагдац
+
+v_active_products харагдац нь зөвхөн discontinued = 0 бүтээгдэхүүнийг харуулна.
+Энэ нь нэг хүснэгтийн шууд багануудаас бүрдсэн тул харагдацын бүх багана
+техникийн хувьд шинэчлэгдэх боломжтой. Гэхдээ WITH CHECK OPTION нь өөрчлөлтийн
+дараа мөр харагдацын нөхцөлийг заавал хангахыг шаарддаг.
+
+
+SQL асуулга
+CREATE OR REPLACE VIEW v_active_products AS
+SELECT
+    product_id,
+    product_name,
+    supplier_id,
+    category_id,
+    quantity_per_unit,
+    unit_price,
+    units_in_stock,
+    units_on_order,
+    reorder_level,
+    discontinued
+FROM products
+WHERE discontinued = 0
+WITH CHECK OPTION;
+
+-- This block demonstrates the successful INSERT and UPDATE safely.
+-- ROLLBACK removes both test changes.
+BEGIN;
+
+-- Successful INSERT: the new row satisfies discontinued = 0.
+INSERT INTO v_active_products (
+    product_id, product_name, unit_price, units_in_stock,
+    units_on_order, reorder_level, discontinued
+)
+VALUES (32000, 'Lab Test Product', 10.00, 5, 0, 2, 0);
+
+-- Successful UPDATE: the row still satisfies discontinued = 0.
+UPDATE v_active_products
+SET unit_price = 12.00
+WHERE product_id = 32000;
+
+-- Confirm that both successful operations took effect before rolling back.
+SELECT product_id, product_name, unit_price, discontinued
+FROM v_active_products
+WHERE product_id = 32000;
+
+ROLLBACK;
+
+-- Run the following statement separately when demonstrating the required
+-- failed UPDATE. It is commented out so the complete lab.sql file can run
+-- without stopping on the expected error.
+
+
+                                                                  Харагдац даалгавар 2   10 / 26
+UPDATE v_active_products
+SET discontinued = 1
+WHERE product_id = 3;
+
+-- Expected error:
+-- new row violates check option for view "v_active_products"
+
+-- This is a simple one-table view, so all columns shown by the view are
+-- updatable. However, discontinued must stay 0. product_id must remain unique,
+-- and supplier_id/category_id must satisfy their foreign-key constraints.
+-- Columns not selected by a view cannot be updated through that view.
+
+
+Баганын шинэчлэгдэх нөхцөл
+
+Бүх багана эх хүснэгтээс шууд сонгогдсон тул шинэчлэгдэх боломжтой.     Нэр,
+үнэ, үлдэгдэл, захиалгад байгаа тоо, дахин захиалах түвшин болон савлагааны
+мэдээллийг энгийн байдлаар өөрчилж болно.
+
+product_id нь давхардахгүй байх ёстой. supplier_id болон category_id нь гадаад
+түлхүүрийн нөхцөлийг хангана. discontinued баганыг 0 хэвээр шинэчилж болох
+боловч 1 болгохыг WITH CHECK OPTION хориглоно. Тооцоолсон багана байхгүй учраас
+бүтцийн хувьд шинэчлэх боломжгүй багана байхгүй.
+
+
+
+
+                                                                Харагдац даалгавар 2   11 / 26
+Дасгал 5 Амжилттай INSERT ба UPDATE
+
+
+
+
+                                      Харагдац даалгавар 2   12 / 26
+Дасгал 5 Асуулгын үр дүн
+
+
+
+
+discontinued = 1 болгох UPDATE нь мөрийг харагдацын WHERE discontinued = 0 нөхцөлөөс
+гаргах тул PostgreSQL шинэ мөр харагдацын шалгалтыг зөрчсөн гэсэн алдаа өгч үйлдлийг
+цуцлав.
+
+
+
+
+                                                        Харагдац даалгавар 2   13 / 26
+Дасгал 6
+
+
+Материалчлагдсан сарын борлуулалтын харагдац
+
+mv_monthly_sales материалчлагдсан харагдац нь улс болон жил-сараар нийт
+орлого, захиалгын тоог урьдчилан тооцож хадгална. year_month, country хос
+баганад unique индекс үүсгэснээр хэрэглэгчдийн уншилтыг удаан хаахгүй REFRESH
+MATERIALIZED VIEW CONCURRENTLY командыг ажиллуулах боломжтой болсон.
+
+Энгийн харагдац эх хүснэгт бүрийг уншихдаа дахин тооцдог. Харин энэ тайлан
+олон давтамжтай уншигдаж, захиалгын өгөгдөл харьцангуй цөөн шинэчлэгддэг үед
+материалчлагдсан харагдац илүү хурдан байна. Сул тал нь REFRESH хийх хүртэл
+хуучин үр дүн харуулж болно.
+
+
+SQL асуулга
+DROP MATERIALIZED VIEW IF EXISTS mv_monthly_sales;
+
+CREATE MATERIALIZED VIEW mv_monthly_sales AS
+SELECT
+    DATE_TRUNC('month', o.order_date)::date AS year_month,
+    o.ship_country AS country,
+    COUNT(DISTINCT o.order_id) AS order_count,
+    SUM((od.unit_price * od.quantity * (1 - od.discount))::numeric) AS total_revenue
+FROM orders AS o
+JOIN order_details AS od ON od.order_id = o.order_id
+WHERE o.order_date IS NOT NULL
+  AND o.ship_country IS NOT NULL
+GROUP BY DATE_TRUNC('month', o.order_date)::date, o.ship_country;
+
+CREATE UNIQUE INDEX ux_mv_monthly_sales_year_month_country
+    ON mv_monthly_sales (year_month, country);
+
+-- The view already contains data, and the unique index makes this possible.
+REFRESH MATERIALIZED VIEW CONCURRENTLY mv_monthly_sales;
+
+SELECT year_month, country, order_count,
+       ROUND(total_revenue, 2) AS total_revenue
+FROM mv_monthly_sales
+ORDER BY year_month, country;
+
+-- A materialized view is useful when this report is read often but source
+-- orders change less often. Reads are faster because the aggregate is stored.
+-- Unlike a normal view, it can be out of date until REFRESH is executed.
+
+
+
+
+                                                                Харагдац даалгавар 2   14 / 26
+Дасгал 6 Асуулгын үр дүн
+
+
+
+
+Материалчлагдсан харагдац улс ба сарын түвшинд захиалгын тоо болон нийт орлогыг
+харуулсан. Үр дүн 1996 оны 7-р сараас эхэлж байна.
+
+
+
+
+                                                     Харагдац даалгавар 2   15 / 26
+Дасгал 7
+
+
+Нөхцөлт агрегат ашигласан пивот харагдац
+
+SUM(CASE WHEN ...) нөхцөлт агрегатаар бүтээгдэхүүний найман ангиллыг тусдаа
+багана болгон хувиргав. COALESCE нь тухайн ангилалд борлуулалтгүй үед NULL-
+ийн оронд 0 харуулна.     Дараагийн асуулга LATERAL VALUES ашиглан хамгийн
+давамгай ангиллыг мөр болгон задлаад, нийт орлогын 50 хувиас их эзлэх ангилалтай
+харилцагчдыг сонгов.
+
+
+SQL асуулга
+CREATE OR REPLACE VIEW v_customer_category_pivot AS
+SELECT
+    c.customer_id,
+    c.company_name,
+    COALESCE(SUM(CASE WHEN cat.category_name = 'Beverages'
+        THEN (od.unit_price * od.quantity * (1 - od.discount))::numeric ELSE 0 END), 0) AS
+    beverages,
+    COALESCE(SUM(CASE WHEN cat.category_name = 'Condiments'
+        THEN (od.unit_price * od.quantity * (1 - od.discount))::numeric ELSE 0 END), 0) AS
+    condiments,
+    COALESCE(SUM(CASE WHEN cat.category_name = 'Confections'
+        THEN (od.unit_price * od.quantity * (1 - od.discount))::numeric ELSE 0 END), 0) AS
+    confections,
+    COALESCE(SUM(CASE WHEN cat.category_name = 'Dairy Products'
+        THEN (od.unit_price * od.quantity * (1 - od.discount))::numeric ELSE 0 END), 0) AS
+    dairy_products,
+    COALESCE(SUM(CASE WHEN cat.category_name = 'Grains/Cereals'
+        THEN (od.unit_price * od.quantity * (1 - od.discount))::numeric ELSE 0 END), 0) AS
+    grains_cereals,
+    COALESCE(SUM(CASE WHEN cat.category_name = 'Meat/Poultry'
+        THEN (od.unit_price * od.quantity * (1 - od.discount))::numeric ELSE 0 END), 0) AS
+    meat_poultry,
+    COALESCE(SUM(CASE WHEN cat.category_name = 'Produce'
+        THEN (od.unit_price * od.quantity * (1 - od.discount))::numeric ELSE 0 END), 0) AS
+    produce,
+    COALESCE(SUM(CASE WHEN cat.category_name = 'Seafood'
+        THEN (od.unit_price * od.quantity * (1 - od.discount))::numeric ELSE 0 END), 0) AS
+    seafood,
+    COALESCE(SUM((od.unit_price * od.quantity * (1 - od.discount))::numeric), 0) AS
+    total_revenue
+FROM customers AS c
+LEFT JOIN orders AS o ON o.customer_id = c.customer_id
+LEFT JOIN order_details AS od ON od.order_id = o.order_id
+LEFT JOIN products AS p ON p.product_id = od.product_id
+LEFT JOIN categories AS cat ON cat.category_id = p.category_id
+GROUP BY c.customer_id, c.company_name;
+
+-- Pivot table result.
+SELECT
+    customer_id,
+    company_name,
+    ROUND(beverages, 2) AS beverages,
+
+
+
+                                                                Харагдац даалгавар 2     16 / 26
+    ROUND(condiments, 2) AS condiments,
+    ROUND(confections, 2) AS confections,
+    ROUND(dairy_products, 2) AS dairy_products,
+    ROUND(grains_cereals, 2) AS grains_cereals,
+    ROUND(meat_poultry, 2) AS meat_poultry,
+    ROUND(produce, 2) AS produce,
+    ROUND(seafood, 2) AS seafood,
+    ROUND(total_revenue, 2) AS total_revenue
+FROM v_customer_category_pivot
+ORDER BY customer_id;
+
+-- Customers receiving more than 50% of revenue from one category.
+SELECT
+    p.company_name,
+    d.category_name AS dominant_category,
+    ROUND(d.category_revenue, 2) AS dominant_revenue,
+    ROUND(p.total_revenue, 2) AS total_revenue,
+    ROUND(100 * d.category_revenue / p.total_revenue, 1) AS share
+FROM v_customer_category_pivot AS p
+CROSS JOIN LATERAL (
+    VALUES
+        ('Beverages', p.beverages),
+        ('Condiments', p.condiments),
+        ('Confections', p.confections),
+        ('Dairy Products', p.dairy_products),
+        ('Grains/Cereals', p.grains_cereals),
+        ('Meat/Poultry', p.meat_poultry),
+        ('Produce', p.produce),
+        ('Seafood', p.seafood)
+) AS d(category_name, category_revenue)
+WHERE p.total_revenue > 0
+  AND d.category_revenue > p.total_revenue * 0.50
+ORDER BY share DESC, p.company_name;
+
+
+
+
+                                                                Харагдац даалгавар 2   17 / 26
+Дасгал 7 Асуулгын үр дүн
+
+
+
+
+Нийт 18 харилцагчийн орлогын талаас илүү хувь нэг ангиллаас бүрдсэн. The Big Cheese-ийн
+орлогын 82.6 хувь Beverages, Centro comercial Moctezuma-ийн 79.4 хувь Confections ангиллаас
+бүрджээ.
+
+
+
+
+                                                             Харагдац даалгавар 2   18 / 26
+Дасгал 8
+
+
+Харагдац ашигласан харагдац ба сарын өөрчлөлт
+
+Эхний v_order_lines харагдац захиалгын мөр бүрийн дүнг тооцно.      Үүнээс
+v_category_monthly нь ангилал тус бүрийн сарын орлогыг нэгтгэж, гурав дахь
+v_category_monthly_change харагдац LAG() ашиглан өмнөх сарын орлогыг авна.
+Өөрчлөлтийн дүнгээр өсөхөөр эрэмбэлж эхний мөрийг сонгосноор хамгийн их
+бууралтыг олов.
+
+
+SQL асуулга
+CREATE OR REPLACE VIEW v_order_lines AS
+SELECT
+    o.order_id,
+    o.order_date,
+    p.product_id,
+    p.product_name,
+    c.category_id,
+    c.category_name,
+    od.unit_price,
+    od.quantity,
+    od.discount,
+    (od.unit_price * od.quantity * (1 - od.discount))::numeric AS line_total
+FROM orders AS o
+JOIN order_details AS od ON od.order_id = o.order_id
+JOIN products AS p ON p.product_id = od.product_id
+JOIN categories AS c ON c.category_id = p.category_id;
+
+CREATE OR REPLACE VIEW v_category_monthly AS
+SELECT
+    category_id,
+    category_name,
+    DATE_TRUNC('month', order_date)::date AS month,
+    SUM(line_total) AS current_revenue
+FROM v_order_lines
+GROUP BY category_id, category_name, DATE_TRUNC('month', order_date)::date;
+
+CREATE OR REPLACE VIEW v_category_monthly_change AS
+WITH monthly_with_previous AS (
+    SELECT
+        category_id,
+        category_name,
+        month,
+        current_revenue,
+        LAG(current_revenue) OVER (
+            PARTITION BY category_id
+            ORDER BY month
+        ) AS previous_revenue
+    FROM v_category_monthly
+)
+SELECT
+    category_id,
+    category_name,
+
+
+
+                                                                Харагдац даалгавар 2   19 / 26
+    month,
+    previous_revenue,
+    current_revenue,
+    current_revenue - previous_revenue AS change_amount,
+    100 * (current_revenue - previous_revenue)
+        / NULLIF(previous_revenue, 0) AS change_percent
+FROM monthly_with_previous;
+
+-- The category with the largest one-month decrease.
+SELECT
+    category_name,
+    month,
+    ROUND(previous_revenue, 2) AS previous_revenue,
+    ROUND(current_revenue, 2) AS current_revenue,
+    ROUND(change_amount, 2) AS change_amount,
+    ROUND(change_percent, 2) AS change_percent
+FROM v_category_monthly_change
+WHERE previous_revenue IS NOT NULL
+ORDER BY change_amount ASC
+LIMIT 1;
+
+
+
+
+                                                           Харагдац даалгавар 2   20 / 26
+Дасгал 8 Асуулгын үр дүн
+
+
+
+
+1998 оны 5-р сард Dairy Products ангиллын орлого өмнөх сарын 34679.90-ээс 628.12 болж,
+34051.78 буюу 98.19 хувиар буурсан нь хамгийн их сарын бууралт байв.
+
+
+
+
+                                                         Харагдац даалгавар 2   21 / 26
+Дасгал 9
+
+
+Хожимдсон хүргэлтийн шинжилгээ
+
+CASE илэрхийлэл нь хүргэлт бүрийг On time, Late, Not shipped төлөвт ангилна.
+Хүргэсэн захиалгуудыг суурь болгон тээвэрлэгч бүрийн хожимдсон хүргэлтийн хувь
+болон зөвхөн хоцорсон хүргэлтийн дундаж өдрийг тооцоолж, хамгийн муугаас
+хамгийн сайн руу эрэмбэлэв.
+
+
+SQL асуулга
+CREATE OR REPLACE VIEW v_shipment_performance AS
+SELECT
+    o.order_id,
+    o.required_date,
+    o.shipped_date,
+    o.shipped_date - o.required_date AS delivery_days,
+    CASE
+         WHEN o.shipped_date IS NULL THEN 'Not shipped'
+         WHEN o.shipped_date <= o.required_date THEN 'On time'
+         ELSE 'Late'
+    END AS shipment_status,
+    s.company_name AS shipper_name
+FROM orders AS o
+JOIN shippers AS s ON s.shipper_id = o.ship_via;
+
+SELECT
+    shipper_name,
+    COUNT(*) FILTER (WHERE shipped_date IS NOT NULL) AS shipped_orders,
+    COUNT(*) FILTER (WHERE shipment_status = 'Late') AS late_orders,
+    ROUND(
+        100.0 * COUNT(*) FILTER (WHERE shipment_status = 'Late')
+        / NULLIF(COUNT(*) FILTER (WHERE shipped_date IS NOT NULL), 0),
+        2
+    ) AS late_percentage,
+    ROUND(
+        AVG(delivery_days) FILTER (WHERE shipment_status = 'Late'),
+        2
+    ) AS average_late_days
+FROM v_shipment_performance
+GROUP BY shipper_name
+ORDER BY late_percentage DESC, average_late_days DESC;
+
+
+
+
+                                                                 Харагдац даалгавар 2   22 / 26
+Дасгал 9 Асуулгын үр дүн
+
+
+
+
+United Package 315 хүргэлтээс 16 удаа хоцорч, 5.08 хувийн үзүүлэлтээр хамгийн муу байр
+эзлэв. Speedy Express-ийн хоцролтын хувь 4.90 боловч хоцорсон өдрийн дундаж 8.08 өдөр
+байна.
+
+
+
+
+                                                         Харагдац даалгавар 2   23 / 26
+Дасгал 10
+
+
+Бараа материалын төлөвийн харагдац
+
+v_product_inventory_status харагдац нь бүтээгдэхүүн, нийлүүлэгч, ангиллын
+мэдээллийг нэгтгэж нөөцийн үнийг тооцно. CASE логикоор захиалгад байгаа хэмжээг
+оролцуулсан ч дахин захиалах түвшинд хүрэхгүй бол Reorder needed, одоогийн
+үлдэгдэл бага бол Low, бусад үед OK төлөв өгнө.      Захиалгад орохоо больсон
+бүтээгдэхүүнийг оруулаагүй.
+
+
+SQL асуулга
+CREATE OR REPLACE VIEW v_product_inventory_status AS
+SELECT
+    p.product_id,
+    p.product_name,
+    s.supplier_id,
+    s.company_name AS supplier_name,
+    c.category_name,
+    p.unit_price,
+    p.units_in_stock,
+    p.units_on_order,
+    p.reorder_level,
+    (p.unit_price * p.units_in_stock)::numeric AS stock_value,
+    CASE
+         WHEN p.units_in_stock + p.units_on_order < p.reorder_level
+             THEN 'Reorder needed'
+         WHEN p.units_in_stock < p.reorder_level
+             THEN 'Low'
+         ELSE 'OK'
+    END AS stock_status
+FROM products AS p
+JOIN suppliers AS s ON s.supplier_id = p.supplier_id
+JOIN categories AS c ON c.category_id = p.category_id
+WHERE p.discontinued = 0;
+
+-- View result.
+SELECT
+    product_name,
+    supplier_name,
+    category_name,
+    unit_price,
+    units_in_stock,
+    units_on_order,
+    reorder_level,
+    ROUND(stock_value, 2) AS stock_value,
+    stock_status
+FROM v_product_inventory_status
+ORDER BY supplier_name, product_name;
+
+-- Supplier summary for products that need reordering.
+SELECT
+    supplier_name,
+    COUNT(*) FILTER (WHERE stock_status = 'Reorder needed') AS reorder_products,
+    ROUND(
+        SUM(stock_value) FILTER (WHERE stock_status = 'Reorder needed'),
+        2
+    ) AS total_stock_value
+FROM v_product_inventory_status
+GROUP BY supplier_id, supplier_name
+HAVING COUNT(*) FILTER (WHERE stock_status = 'Reorder needed') > 0
+ORDER BY reorder_products DESC, supplier_name;
+
+
+
+                                                                        Харагдац даалгавар 2   24 / 26
+Дасгал 10 Харагдацын үр дүн
+
+
+
+
+Идэвхтэй бүтээгдэхүүн бүрийн нийлүүлэгч, ангилал, нөөцийн тоо, нөөцийн үнэ болон
+тооцоолсон төлөвийг харуулав.
+
+
+
+
+                                                     Харагдац даалгавар 2   25 / 26
+Дасгал 10 Асуулгын үр дүн
+
+
+
+
+Дахин захиалах шаардлагатай бүтээгдэхүүнтэй хоёр нийлүүлэгч гарсан. Nord-Ost-Fisch Han-
+delsgesellschaft mbH-ийн нөөцийн үнэ 258.90, Pavlova, Ltd.-ийн нөөцийн үнэ 225.00 байна.
+
+
+
+
+                                                          Харагдац даалгавар 2   26 / 26
+

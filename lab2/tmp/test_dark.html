@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #0d1117;
+    padding: 10px;
+    display: inline-block;
+    width: auto;
+  }
+  .panel {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    overflow: hidden;
+    display: inline-block;
+  }
+  .panel-header {
+    background: #21262d;
+    padding: 6px 12px;
+    font-family: sans-serif;
+    font-size: 12px;
+    color: #58a6ff;
+    font-weight: 600;
+  }
+  table {
+    border-collapse: collapse;
+    font-family: 'DejaVu Sans Mono', Consolas, monospace;
+    font-size: 12px;
+  }
+  th {
+    background: #161b22;
+    color: #7ee787;
+    padding: 6px 12px;
+    border-bottom: 2px solid #30363d;
+    text-align: left;
+    white-space: nowrap;
+  }
+  td {
+    padding: 5px 12px;
+    border-bottom: 1px solid #21262d;
+    color: #c9d1d9;
+    white-space: nowrap;
+  }
+  tr:nth-child(even) td { background: #0d1117; }
+</style>
+</head>
+<body>
+<div class='panel'>
+  <div class='panel-header'>Test Title</div>
+  <table>
+    <thead><tr><th>col1</th><th>col2</th><th>col3</th></tr></thead>
+    <tbody>
+      <tr><td>val1</td><td>val2</td><td>val3</td></tr>
+      <tr><td>val4</td><td>val5</td><td>val6</td></tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>

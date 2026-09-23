@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    display: inline-block;
+  }
+  .panel {
+    background: #181818;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    margin: 8px;
+    display: inline-block;
+  }
+  .panel-header {
+    background: #252526;
+    padding: 8px 16px;
+    border-bottom: 1px solid #333333;
+    font-size: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "DejaVu Sans", sans-serif;
+    color: #9cdcfe;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+  }
+  .panel-header .title {
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .panel-header .meta {
+    color: #858585;
+    font-size: 11px;
+    background: #1e1e1e;
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid #3c3c3c;
+  }
+  table {
+    border-collapse: collapse;
+    font-family: 'DejaVu Sans Mono', Consolas, monospace;
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+  th {
+    background: #1f1f1f;
+    color: #4ec9b0;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-bottom: 2px solid #383838;
+    border-right: 1px solid #2d2d2d;
+    white-space: nowrap;
+    text-align: left;
+  }
+  th.num { text-align: right; }
+  th.center { text-align: center; }
+  th:last-child { border-right: none; }
+  td {
+    padding: 5px 14px;
+    border-bottom: 1px solid #262626;
+    border-right: 1px solid #262626;
+    color: #cccccc;
+    white-space: nowrap;
+  }
+  td:last-child { border-right: none; }
+  tr:nth-child(even) td {
+    background: #151515;
+  }
+  tr:nth-child(odd) td {
+    background: #1c1c1c;
+  }
+  td.num { text-align: right; color: #b5cea8; }
+  td.text { text-align: left; }
+  td.date { text-align: center; color: #ce9178; }
+  td.id { text-align: right; color: #9cdcfe; font-weight: 600; }
+  td.rank { text-align: center; color: #dcdcaa; font-weight: bold; }
+  
+  .badge {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .badge-ok { background: rgba(78, 201, 176, 0.18); color: #4ec9b0; border: 1px solid rgba(78, 201, 176, 0.4); }
+  .badge-low { background: rgba(220, 220, 170, 0.18); color: #dcdcaa; border: 1px solid rgba(220, 220, 170, 0.4); }
+  .badge-reorder { background: rgba(244, 71, 71, 0.22); color: #f48771; border: 1px solid rgba(244, 71, 71, 0.5); }
+  .badge-late { background: rgba(244, 71, 71, 0.22); color: #f48771; border: 1px solid rgba(244, 71, 71, 0.5); }
+  .badge-ontime { background: rgba(78, 201, 176, 0.18); color: #4ec9b0; border: 1px solid rgba(78, 201, 176, 0.4); }
+
+  /* Console error styling */
+  .console {
+    background: #181818;
+    color: #cccccc;
+    font-family: 'DejaVu Sans Mono', Consolas, monospace;
+    font-size: 12px;
+    padding: 14px 18px;
+    border-left: 4px solid #f44747;
+    line-height: 1.55;
+    min-width: 680px;
+  }
+  .console .cmd {
+    color: #9cdcfe;
+    margin-bottom: 8px;
+  }
+  .console .err {
+    color: #f48771;
+    font-weight: 600;
+  }
+  .console .detail {
+    color: #858585;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+    <div class='panel'>
+      <div class='panel-header'>
+        <span class='title'>mv_monthly_sales — Материалчлагдсан харагдац (Эхний 14 мөрийн хэсэг)</span>
+        <span class='meta'>Excerpt: 14 of 322 rows</span>
+      </div>
+      <table>
+        <thead><tr><th class='center'>year_month</th><th class='text'>country</th><th class='num'>order_count</th><th class='num'>total_revenue</th></tr></thead>
+        <tbody><tr><td class='date'>1996-07-01</td><td class='text'>Austria</td><td class='num'>2</td><td class='num'>3,488.68</td></tr>
+<tr><td class='date'>1996-07-01</td><td class='text'>Belgium</td><td class='num'>1</td><td class='num'>3,597.90</td></tr>
+<tr><td class='date'>1996-07-01</td><td class='text'>Brazil</td><td class='num'>4</td><td class='num'>3,963.20</td></tr>
+<tr><td class='date'>1996-07-01</td><td class='text'>Finland</td><td class='num'>1</td><td class='num'>346.56</td></tr>
+<tr><td class='date'>1996-07-01</td><td class='text'>France</td><td class='num'>3</td><td class='num'>2,270.06</td></tr>
+<tr><td class='date'>1996-07-01</td><td class='text'>Germany</td><td class='num'>3</td><td class='num'>6,904.65</td></tr>
+<tr><td class='date'>1996-07-01</td><td class='text'>Mexico</td><td class='num'>1</td><td class='num'>100.80</td></tr>
+<tr><td class='date'>1996-07-01</td><td class='text'>Sweden</td><td class='num'>1</td><td class='num'>695.62</td></tr>
+<tr><td class='date'>1996-07-01</td><td class='text'>Switzerland</td><td class='num'>2</td><td class='num'>3,047.12</td></tr>
+<tr><td class='date'>1996-07-01</td><td class='text'>USA</td><td class='num'>2</td><td class='num'>1,226.20</td></tr>
+<tr><td class='date'>1996-07-01</td><td class='text'>Venezuela</td><td class='num'>2</td><td class='num'>2,221.10</td></tr>
+<tr><td class='date'>1996-08-01</td><td class='text'>Brazil</td><td class='num'>4</td><td class='num'>4,781.52</td></tr>
+<tr><td class='date'>1996-08-01</td><td class='text'>Finland</td><td class='num'>1</td><td class='num'>1,376</td></tr>
+<tr><td class='date'>1996-08-01</td><td class='text'>France</td><td class='num'>1</td><td class='num'>538.60</td></tr>
+</tbody>
+      </table>
+    </div>
+    
+</body>
+</html>

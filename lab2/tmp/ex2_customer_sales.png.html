@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    display: inline-block;
+  }
+  .panel {
+    background: #181818;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    margin: 8px;
+    display: inline-block;
+  }
+  .panel-header {
+    background: #252526;
+    padding: 8px 16px;
+    border-bottom: 1px solid #333333;
+    font-size: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "DejaVu Sans", sans-serif;
+    color: #9cdcfe;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+  }
+  .panel-header .title {
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .panel-header .meta {
+    color: #858585;
+    font-size: 11px;
+    background: #1e1e1e;
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid #3c3c3c;
+  }
+  table {
+    border-collapse: collapse;
+    font-family: 'DejaVu Sans Mono', Consolas, monospace;
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+  th {
+    background: #1f1f1f;
+    color: #4ec9b0;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-bottom: 2px solid #383838;
+    border-right: 1px solid #2d2d2d;
+    white-space: nowrap;
+    text-align: left;
+  }
+  th.num { text-align: right; }
+  th.center { text-align: center; }
+  th:last-child { border-right: none; }
+  td {
+    padding: 5px 14px;
+    border-bottom: 1px solid #262626;
+    border-right: 1px solid #262626;
+    color: #cccccc;
+    white-space: nowrap;
+  }
+  td:last-child { border-right: none; }
+  tr:nth-child(even) td {
+    background: #151515;
+  }
+  tr:nth-child(odd) td {
+    background: #1c1c1c;
+  }
+  td.num { text-align: right; color: #b5cea8; }
+  td.text { text-align: left; }
+  td.date { text-align: center; color: #ce9178; }
+  td.id { text-align: right; color: #9cdcfe; font-weight: 600; }
+  td.rank { text-align: center; color: #dcdcaa; font-weight: bold; }
+  
+  .badge {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .badge-ok { background: rgba(78, 201, 176, 0.18); color: #4ec9b0; border: 1px solid rgba(78, 201, 176, 0.4); }
+  .badge-low { background: rgba(220, 220, 170, 0.18); color: #dcdcaa; border: 1px solid rgba(220, 220, 170, 0.4); }
+  .badge-reorder { background: rgba(244, 71, 71, 0.22); color: #f48771; border: 1px solid rgba(244, 71, 71, 0.5); }
+  .badge-late { background: rgba(244, 71, 71, 0.22); color: #f48771; border: 1px solid rgba(244, 71, 71, 0.5); }
+  .badge-ontime { background: rgba(78, 201, 176, 0.18); color: #4ec9b0; border: 1px solid rgba(78, 201, 176, 0.4); }
+
+  /* Console error styling */
+  .console {
+    background: #181818;
+    color: #cccccc;
+    font-family: 'DejaVu Sans Mono', Consolas, monospace;
+    font-size: 12px;
+    padding: 14px 18px;
+    border-left: 4px solid #f44747;
+    line-height: 1.55;
+    min-width: 680px;
+  }
+  .console .cmd {
+    color: #9cdcfe;
+    margin-bottom: 8px;
+  }
+  .console .err {
+    color: #f48771;
+    font-weight: 600;
+  }
+  .console .detail {
+    color: #858585;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+    <div class='panel'>
+      <div class='panel-header'>
+        <span class='title'>v_customer_sales — Захиалгын дундаж дүн өндөртэй харилцагчид</span>
+        <span class='meta'>22 rows</span>
+      </div>
+      <table>
+        <thead><tr><th class='num'>customer_id</th><th class='text'>company_name</th><th class='text'>country</th><th class='num'>order_count</th><th class='num'>total_revenue</th><th class='num'>average_order_value</th><th class='center'>last_order_date</th></tr></thead>
+        <tbody><tr><td class='id'>QUICK</td><td class='text'>QUICK-Stop</td><td class='text'>Germany</td><td class='num'>28</td><td class='num'>110,277.31</td><td class='num'>3,938.48</td><td class='date'>1998-04-14</td></tr>
+<tr><td class='id'>ERNSH</td><td class='text'>Ernst Handel</td><td class='text'>Austria</td><td class='num'>30</td><td class='num'>104,874.98</td><td class='num'>3,495.83</td><td class='date'>1998-05-05</td></tr>
+<tr><td class='id'>SAVEA</td><td class='text'>Save-a-lot Markets</td><td class='text'>USA</td><td class='num'>31</td><td class='num'>104,361.95</td><td class='num'>3,366.51</td><td class='date'>1998-05-01</td></tr>
+<tr><td class='id'>RATTC</td><td class='text'>Rattlesnake Canyon Grocery</td><td class='text'>USA</td><td class='num'>18</td><td class='num'>51,097.80</td><td class='num'>2,838.77</td><td class='date'>1998-05-06</td></tr>
+<tr><td class='id'>HUNGO</td><td class='text'>Hungry Owl All-Night Grocers</td><td class='text'>Ireland</td><td class='num'>19</td><td class='num'>49,979.91</td><td class='num'>2,630.52</td><td class='date'>1998-04-30</td></tr>
+<tr><td class='id'>SIMOB</td><td class='text'>Simons bistro</td><td class='text'>Denmark</td><td class='num'>7</td><td class='num'>16,817.10</td><td class='num'>2,402.44</td><td class='date'>1998-05-06</td></tr>
+<tr><td class='id'>HANAR</td><td class='text'>Hanari Carnes</td><td class='text'>Brazil</td><td class='num'>14</td><td class='num'>32,841.37</td><td class='num'>2,345.81</td><td class='date'>1998-04-27</td></tr>
+<tr><td class='id'>FOLIG</td><td class='text'>Folies gourmandes</td><td class='text'>France</td><td class='num'>5</td><td class='num'>11,666.90</td><td class='num'>2,333.38</td><td class='date'>1997-12-22</td></tr>
+<tr><td class='id'>PICCO</td><td class='text'>Piccolo und mehr</td><td class='text'>Austria</td><td class='num'>10</td><td class='num'>23,128.86</td><td class='num'>2,312.89</td><td class='date'>1998-04-27</td></tr>
+<tr><td class='id'>MEREP</td><td class='text'>Mère Paillarde</td><td class='text'>Canada</td><td class='num'>13</td><td class='num'>28,872.19</td><td class='num'>2,220.94</td><td class='date'>1997-10-30</td></tr>
+<tr><td class='id'>KOENE</td><td class='text'>Königlich Essen</td><td class='text'>Germany</td><td class='num'>14</td><td class='num'>30,908.38</td><td class='num'>2,207.74</td><td class='date'>1998-04-16</td></tr>
+<tr><td class='id'>SUPRD</td><td class='text'>Suprêmes délices</td><td class='text'>Belgium</td><td class='num'>12</td><td class='num'>24,088.78</td><td class='num'>2,007.40</td><td class='date'>1998-04-21</td></tr>
+<tr><td class='id'>QUEEN</td><td class='text'>Queen Cozinha</td><td class='text'>Brazil</td><td class='num'>13</td><td class='num'>25,717.50</td><td class='num'>1,978.27</td><td class='date'>1998-05-04</td></tr>
+<tr><td class='id'>WHITC</td><td class='text'>White Clover Markets</td><td class='text'>USA</td><td class='num'>14</td><td class='num'>27,363.60</td><td class='num'>1,954.54</td><td class='date'>1998-05-01</td></tr>
+<tr><td class='id'>RICSU</td><td class='text'>Richter Supermarkt</td><td class='text'>Switzerland</td><td class='num'>10</td><td class='num'>19,343.78</td><td class='num'>1,934.38</td><td class='date'>1998-05-06</td></tr>
+<tr><td class='id'>EASTC</td><td class='text'>Eastern Connection</td><td class='text'>UK</td><td class='num'>8</td><td class='num'>14,761.03</td><td class='num'>1,845.13</td><td class='date'>1998-04-28</td></tr>
+<tr><td class='id'>SEVES</td><td class='text'>Seven Seas Imports</td><td class='text'>UK</td><td class='num'>9</td><td class='num'>16,215.33</td><td class='num'>1,801.70</td><td class='date'>1998-02-04</td></tr>
+<tr><td class='id'>FRANK</td><td class='text'>Frankenversand</td><td class='text'>Germany</td><td class='num'>15</td><td class='num'>26,656.56</td><td class='num'>1,777.10</td><td class='date'>1998-04-09</td></tr>
+<tr><td class='id'>BLONP</td><td class='text'>Blondesddsl père et fils</td><td class='text'>France</td><td class='num'>11</td><td class='num'>18,534.08</td><td class='num'>1,684.92</td><td class='date'>1998-01-12</td></tr>
+<tr><td class='id'>GREAL</td><td class='text'>Great Lakes Food Market</td><td class='text'>USA</td><td class='num'>11</td><td class='num'>18,507.45</td><td class='num'>1,682.50</td><td class='date'>1998-04-30</td></tr>
+<tr><td class='id'>FOLKO</td><td class='text'>Folk och fä HB</td><td class='text'>Sweden</td><td class='num'>19</td><td class='num'>29,567.56</td><td class='num'>1,556.19</td><td class='date'>1998-04-27</td></tr>
+<tr><td class='id'>CHOPS</td><td class='text'>Chop-suey Chinese</td><td class='text'>Switzerland</td><td class='num'>8</td><td class='num'>12,348.88</td><td class='num'>1,543.61</td><td class='date'>1998-04-22</td></tr>
+</tbody>
+      </table>
+    </div>
+    
+</body>
+</html>

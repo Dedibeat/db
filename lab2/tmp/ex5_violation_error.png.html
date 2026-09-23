@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    display: inline-block;
+  }
+  .panel {
+    background: #181818;
+    border: 1px solid #333333;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    margin: 8px;
+    display: inline-block;
+  }
+  .panel-header {
+    background: #252526;
+    padding: 8px 16px;
+    border-bottom: 1px solid #333333;
+    font-size: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "DejaVu Sans", sans-serif;
+    color: #9cdcfe;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+  }
+  .panel-header .title {
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .panel-header .meta {
+    color: #858585;
+    font-size: 11px;
+    background: #1e1e1e;
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid #3c3c3c;
+  }
+  table {
+    border-collapse: collapse;
+    font-family: 'DejaVu Sans Mono', Consolas, monospace;
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+  th {
+    background: #1f1f1f;
+    color: #4ec9b0;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-bottom: 2px solid #383838;
+    border-right: 1px solid #2d2d2d;
+    white-space: nowrap;
+    text-align: left;
+  }
+  th.num { text-align: right; }
+  th.center { text-align: center; }
+  th:last-child { border-right: none; }
+  td {
+    padding: 5px 14px;
+    border-bottom: 1px solid #262626;
+    border-right: 1px solid #262626;
+    color: #cccccc;
+    white-space: nowrap;
+  }
+  td:last-child { border-right: none; }
+  tr:nth-child(even) td {
+    background: #151515;
+  }
+  tr:nth-child(odd) td {
+    background: #1c1c1c;
+  }
+  td.num { text-align: right; color: #b5cea8; }
+  td.text { text-align: left; }
+  td.date { text-align: center; color: #ce9178; }
+  td.id { text-align: right; color: #9cdcfe; font-weight: 600; }
+  td.rank { text-align: center; color: #dcdcaa; font-weight: bold; }
+  
+  .badge {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .badge-ok { background: rgba(78, 201, 176, 0.18); color: #4ec9b0; border: 1px solid rgba(78, 201, 176, 0.4); }
+  .badge-low { background: rgba(220, 220, 170, 0.18); color: #dcdcaa; border: 1px solid rgba(220, 220, 170, 0.4); }
+  .badge-reorder { background: rgba(244, 71, 71, 0.22); color: #f48771; border: 1px solid rgba(244, 71, 71, 0.5); }
+  .badge-late { background: rgba(244, 71, 71, 0.22); color: #f48771; border: 1px solid rgba(244, 71, 71, 0.5); }
+  .badge-ontime { background: rgba(78, 201, 176, 0.18); color: #4ec9b0; border: 1px solid rgba(78, 201, 176, 0.4); }
+
+  /* Console error styling */
+  .console {
+    background: #181818;
+    color: #cccccc;
+    font-family: 'DejaVu Sans Mono', Consolas, monospace;
+    font-size: 12px;
+    padding: 14px 18px;
+    border-left: 4px solid #f44747;
+    line-height: 1.55;
+    min-width: 680px;
+  }
+  .console .cmd {
+    color: #9cdcfe;
+    margin-bottom: 8px;
+  }
+  .console .err {
+    color: #f48771;
+    font-weight: 600;
+  }
+  .console .detail {
+    color: #858585;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+    <div class='panel'>
+      <div class='panel-header'>
+        <span class='title'>PostgreSQL Асуулга — WITH CHECK OPTION Шалгалтын Алдаа</span>
+        <span class='meta'>ERROR (44000)</span>
+      </div>
+      <div class='console'>
+        <div class='cmd'>psql&gt; UPDATE v_active_products SET discontinued = 1 WHERE product_id = 3;</div>
+        <div class='err'>ERROR: new row violates check option for view "v_active_products"</div>
+        <div class='detail'>DETAIL: Failing row contains (3, Aniseed Syrup, 1, 2, 12 - 550 ml bottles, 10, 13, 70, 25, 1).</div>
+      </div>
+    </div>
+    
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Database Start",
+      "type": "shell",
+      "command": "./scripts/db.sh start",
+      "problemMatcher": []
+    },
+    {
+      "label": "Database Check",
+      "type": "shell",
+      "command": "./scripts/db.sh check",
+      "problemMatcher": []
+    },
+    {
+      "label": "Database Connect",
+      "type": "shell",
+      "command": "./scripts/db.sh connect",
+      "problemMatcher": [],
+      "presentation": {
+        "focus": true
+      }
+    }
+  ]
+}

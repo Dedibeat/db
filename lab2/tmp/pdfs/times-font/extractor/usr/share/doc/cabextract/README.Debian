@@ -1,0 +1,32 @@
+cabextract for Debian
+----------------------
+
+This was packaged for debian to help msttcorefonts work better.
+
+The cabextract source also contains source for a testing/debugging
+executable called cabinfo which will display internal flags and data block
+divisions of an archive file.  This is not of general use, so is not
+included in the binary Debian package.
+
+ -- Eric Sharkey <sharkey@debian.org>, Thu, 11 Jan 2001 13:05:48 -0500
+
+Cabextract-KDE Integration
+--------------------------
+KDE support has been added to the cabextract package by Debian.
+Currently using cabextract-1.2 and KDE-3.5.3.
+
+
+Cabextract is accessible in KDE via Konqueror's context menu, where
+*.cab and *.exe files will have entries in the Actions submenu for
+viewing and extracting the archive(s).
+
+Cabinet contents are listed in a minimal, non-interactive Konsole
+window. Use Konsole's menu (RMB or LMB on the background, for RH and
+LH mouse setups respectively) to expand the session if necessary.
+
+Extractions are made to the same directory the selected *.cab or *.exe
+file resides in.
+
+
+Bruce Sass <bmsass@shaw.ca>
+2006-07-04
