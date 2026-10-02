@@ -1,0 +1,14 @@
+ customer_id |         company_name         |  country  |     city      | orders_count 
+-------------+------------------------------+-----------+---------------+--------------
+ SAVEA       | Save-a-lot Markets           | USA       | Boise         |           31
+ ERNSH       | Ernst Handel                 | Austria   | Graz          |           30
+ QUICK       | QUICK-Stop                   | Germany   | Cunewalde     |           28
+ FOLKO       | Folk och fä HB               | Sweden    | Bräcke        |           19
+ HUNGO       | Hungry Owl All-Night Grocers | Ireland   | Cork          |           19
+ BERGS       | Berglunds snabbköp           | Sweden    | Luleå         |           18
+ HILAA       | HILARION-Abastos             | Venezuela | San Cristóbal |           18
+ RATTC       | Rattlesnake Canyon Grocery   | USA       | Albuquerque   |           18
+ BONAP       | Bon app'                     | France    | Marseille     |           17
+ FRANK       | Frankenversand               | Germany   | München       |           15
+(10 rows)
+

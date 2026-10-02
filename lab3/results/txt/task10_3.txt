@@ -1,0 +1,4 @@
+ product_id | product_name | category_name | revenue | revenue_pct | cum_pct | abc_class 
+------------+--------------+---------------+---------+-------------+---------+-----------
+(0 rows)
+

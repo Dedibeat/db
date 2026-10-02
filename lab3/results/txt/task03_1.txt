@@ -1,0 +1,10 @@
+ employee_id |    full_name     |         title         | hire_date  | years_worked 
+-------------+------------------+-----------------------+------------+--------------
+           1 | Nancy Davolio    | Sales Representative  | 1992-05-01 |           34
+           2 | Andrew Fuller    | Vice President, Sales | 1992-08-14 |           34
+           3 | Janet Leverling  | Sales Representative  | 1992-04-01 |           34
+           4 | Margaret Peacock | Sales Representative  | 1993-05-03 |           33
+           5 | Steven Buchanan  | Sales Manager         | 1993-10-17 |           32
+           6 | Michael Suyama   | Sales Representative  | 1993-10-17 |           32
+(6 rows)
+

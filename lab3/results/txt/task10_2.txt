@@ -1,0 +1,12 @@
+ category_name  | a_products | a_revenue 
+----------------+------------+-----------
+ Dairy Products |          8 | 111932.84
+ Meat/Poultry   |          5 |  77790.82
+ Confections    |          5 |  59033.10
+ Beverages      |          4 |  74685.64
+ Produce        |          4 |  53940.27
+ Seafood        |          4 |  42594.38
+ Condiments     |          4 |  32101.87
+ Grains/Cereals |          2 |  40660.48
+(8 rows)
+

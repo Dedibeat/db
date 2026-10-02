@@ -1,0 +1,6 @@
+ product_id |     product_name      | category_id | units_in_stock | units_on_order | reorder_level | shortage 
+------------+-----------------------+-------------+----------------+----------------+---------------+----------
+         30 | Nord-Ost Matjeshering |           8 |             10 |              0 |            15 |        5
+         70 | Outback Lager         |           1 |             15 |             10 |            30 |        5
+(2 rows)
+

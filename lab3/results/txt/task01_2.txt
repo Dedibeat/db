@@ -1,0 +1,6 @@
+ category_name | product_count 
+---------------+---------------
+ Beverages     |             1
+ Seafood       |             1
+(2 rows)
+

@@ -1,0 +1,5 @@
+﻿QUERY PLAN
+Function Scan on abc_analysis  (cost=0.25..10.25 rows=1000 width=196) (actual time=3.806..3.808 rows=77 loops=1)
+"  Buffers: shared hit=3652, local hit=1 dirtied=1 written=1"
+Planning Time: 0.012 ms
+Execution Time: 3.817 ms

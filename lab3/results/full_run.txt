@@ -1,0 +1,800 @@
+DROP TABLE IF EXISTS low_stock;
+NOTICE:  table "low_stock" does not exist, skipping
+DROP TABLE
+CREATE TEMP TABLE low_stock AS
+SELECT
+    product_id,
+    product_name,
+    category_id,
+    units_in_stock,
+    units_on_order,
+    reorder_level,
+    reorder_level - (units_in_stock + units_on_order) AS shortage
+FROM products
+WHERE units_in_stock + units_on_order < reorder_level
+  AND discontinued = 0;
+SELECT 2
+SELECT *
+FROM low_stock
+ORDER BY shortage DESC;
+ product_id |     product_name      | category_id | units_in_stock | units_on_order | reorder_level | shortage 
+------------+-----------------------+-------------+----------------+----------------+---------------+----------
+         30 | Nord-Ost Matjeshering |           8 |             10 |              0 |            15 |        5
+         70 | Outback Lager         |           1 |             15 |             10 |            30 |        5
+(2 rows)
+
+SELECT c.category_name, COUNT(*) AS product_count
+FROM low_stock AS ls
+JOIN categories AS c ON c.category_id = ls.category_id
+GROUP BY c.category_name
+ORDER BY product_count DESC, c.category_name;
+ category_name | product_count 
+---------------+---------------
+ Beverages     |             1
+ Seafood       |             1
+(2 rows)
+
+DROP TABLE IF EXISTS low_stock;
+DROP TABLE
+CREATE OR REPLACE FUNCTION ship_days(p_order_date DATE, p_shipped_date DATE)
+RETURNS INT
+LANGUAGE sql
+IMMUTABLE
+AS $$
+    -- p_shipped_date нь NULL бол хасах үйлдэл өөрөө NULL буцаана
+    SELECT p_shipped_date - p_order_date;
+$$;
+CREATE FUNCTION
+SELECT ROUND(AVG(ship_days(order_date, shipped_date)), 1) AS avg_ship_days
+FROM orders
+WHERE EXTRACT(YEAR FROM order_date) = 1997;
+ avg_ship_days 
+---------------
+           8.9
+(1 row)
+
+SELECT order_id, customer_id, order_date, shipped_date,
+       ship_days(order_date, shipped_date) AS ship_days
+FROM orders
+WHERE EXTRACT(YEAR FROM order_date) = 1997
+  AND shipped_date IS NOT NULL
+ORDER BY ship_days DESC, order_id
+LIMIT 5;
+ order_id | customer_id | order_date | shipped_date | ship_days 
+----------+-------------+------------+--------------+-----------
+    10660 | HUNGC       | 1997-09-08 | 1997-10-15   |        37
+    10777 | GOURL       | 1997-12-15 | 1998-01-21   |        37
+    10427 | PICCO       | 1997-01-27 | 1997-03-03   |        35
+    10545 | LAZYK       | 1997-05-22 | 1997-06-26   |        35
+    10593 | LEHMS       | 1997-07-09 | 1997-08-13   |        35
+(5 rows)
+
+SELECT COUNT(*) AS not_shipped_orders
+FROM orders
+WHERE ship_days(order_date, shipped_date) IS NULL;
+ not_shipped_orders 
+--------------------
+                 21
+(1 row)
+
+DROP TABLE IF EXISTS senior_staff;
+NOTICE:  table "senior_staff" does not exist, skipping
+DROP TABLE
+CREATE TEMP TABLE senior_staff (
+    employee_id  INT PRIMARY KEY,
+    full_name    TEXT,
+    title        TEXT,
+    hire_date    DATE,
+    years_worked INT
+);
+CREATE TABLE
+INSERT INTO senior_staff (employee_id, full_name, title, hire_date, years_worked)
+SELECT
+    employee_id,
+    first_name || ' ' || last_name,
+    title,
+    hire_date,
+    EXTRACT(YEAR FROM age(hire_date))
+FROM employees
+WHERE hire_date < DATE '1994-01-01';
+INSERT 0 6
+SELECT *
+FROM senior_staff
+ORDER BY years_worked DESC, employee_id;
+ employee_id |    full_name     |         title         | hire_date  | years_worked 
+-------------+------------------+-----------------------+------------+--------------
+           1 | Nancy Davolio    | Sales Representative  | 1992-05-01 |           34
+           2 | Andrew Fuller    | Vice President, Sales | 1992-08-14 |           34
+           3 | Janet Leverling  | Sales Representative  | 1992-04-01 |           34
+           4 | Margaret Peacock | Sales Representative  | 1993-05-03 |           33
+           5 | Steven Buchanan  | Sales Manager         | 1993-10-17 |           32
+           6 | Michael Suyama   | Sales Representative  | 1993-10-17 |           32
+(6 rows)
+
+SELECT ROUND(AVG(years_worked), 1) AS avg_years_worked
+FROM senior_staff;
+ avg_years_worked 
+------------------
+             33.2
+(1 row)
+
+DROP TABLE IF EXISTS senior_staff;
+DROP TABLE
+CREATE OR REPLACE FUNCTION freight_class(p_freight NUMERIC)
+RETURNS TEXT
+LANGUAGE sql
+IMMUTABLE
+AS $$
+    SELECT CASE
+        WHEN p_freight IS NULL THEN 'Тодорхойгүй'
+        WHEN p_freight < 50    THEN 'Бага'
+        WHEN p_freight <= 150  THEN 'Дунд'
+        ELSE 'Өндөр'
+    END;
+$$;
+CREATE FUNCTION
+SELECT
+    freight_class(freight::numeric) AS freight_class,
+    COUNT(*) AS orders_count,
+    ROUND(SUM(freight::numeric), 2) AS total_freight,
+    ROUND(AVG(freight::numeric), 2) AS avg_freight
+FROM orders
+WHERE EXTRACT(YEAR FROM order_date) = 1997
+GROUP BY freight_class(freight::numeric)
+ORDER BY avg_freight;
+ freight_class | orders_count | total_freight | avg_freight 
+---------------+--------------+---------------+-------------
+ Бага          |          227 |       4175.56 |       18.39
+ Дунд          |          122 |      10841.74 |       88.87
+ Өндөр         |           59 |      17451.47 |      295.79
+(3 rows)
+
+SELECT ship_country, COUNT(*) AS high_freight_orders
+FROM orders
+WHERE EXTRACT(YEAR FROM order_date) = 1997
+  AND freight_class(freight::numeric) = 'Өндөр'
+GROUP BY ship_country
+ORDER BY high_freight_orders DESC, ship_country
+LIMIT 5;
+ ship_country | high_freight_orders 
+--------------+---------------------
+ Germany      |                  12
+ USA          |                  10
+ Austria      |                   6
+ Canada       |                   5
+ France       |                   5
+(5 rows)
+
+DROP TABLE IF EXISTS customer_activity;
+NOTICE:  table "customer_activity" does not exist, skipping
+DROP TABLE
+CREATE TEMP TABLE customer_activity AS
+SELECT
+    c.customer_id,
+    COUNT(o.order_id) AS orders_count,
+    MIN(o.order_date) AS first_order,
+    MAX(o.order_date) AS last_order,
+    COALESCE(SUM(o.freight::numeric), 0) AS total_freight
+FROM customers AS c
+LEFT JOIN orders AS o ON o.customer_id = c.customer_id
+GROUP BY c.customer_id;
+SELECT 91
+SELECT ca.customer_id, c.company_name, c.country, c.city, ca.orders_count
+FROM customer_activity AS ca
+JOIN customers AS c ON c.customer_id = ca.customer_id
+ORDER BY ca.orders_count DESC, ca.customer_id
+LIMIT 10;
+ customer_id |         company_name         |  country  |     city      | orders_count 
+-------------+------------------------------+-----------+---------------+--------------
+ SAVEA       | Save-a-lot Markets           | USA       | Boise         |           31
+ ERNSH       | Ernst Handel                 | Austria   | Graz          |           30
+ QUICK       | QUICK-Stop                   | Germany   | Cunewalde     |           28
+ FOLKO       | Folk och fä HB               | Sweden    | Bräcke        |           19
+ HUNGO       | Hungry Owl All-Night Grocers | Ireland   | Cork          |           19
+ BERGS       | Berglunds snabbköp           | Sweden    | Luleå         |           18
+ HILAA       | HILARION-Abastos             | Venezuela | San Cristóbal |           18
+ RATTC       | Rattlesnake Canyon Grocery   | USA       | Albuquerque   |           18
+ BONAP       | Bon app'                     | France    | Marseille     |           17
+ FRANK       | Frankenversand               | Germany   | München       |           15
+(10 rows)
+
+SELECT ca.customer_id, c.company_name, c.country, ca.orders_count, ca.last_order
+FROM customer_activity AS ca
+JOIN customers AS c ON c.customer_id = ca.customer_id
+WHERE ca.orders_count > 0
+  AND ca.last_order < DATE '1998-01-01'
+ORDER BY ca.last_order, ca.customer_id;
+ customer_id |        company_name        |  country  | orders_count | last_order 
+-------------+----------------------------+-----------+--------------+------------
+ CENTC       | Centro comercial Moctezuma | Mexico    |            1 | 1996-07-18
+ LAZYK       | Lazy K Kountry Store       | USA       |            2 | 1997-05-22
+ HUNGC       | Hungry Coyote Import Store | USA       |            5 | 1997-09-08
+ MEREP       | Mère Paillarde             | Canada    |           13 | 1997-10-30
+ FAMIA       | Familia Arquibaldo         | Brazil    |            7 | 1997-10-31
+ VINET       | Vins et alcools Chevalier  | France    |            5 | 1997-11-12
+ GROSR       | GROSELLA-Restaurante       | Venezuela |            2 | 1997-12-18
+ FOLIG       | Folies gourmandes          | France    |            5 | 1997-12-22
+(8 rows)
+
+SELECT
+    c.country,
+    COUNT(*) AS customers_count,
+    COUNT(*) FILTER (WHERE ca.orders_count > 0) AS active_customers,
+    ROUND(SUM(ca.total_freight), 2) AS total_freight
+FROM customer_activity AS ca
+JOIN customers AS c ON c.customer_id = ca.customer_id
+GROUP BY c.country
+ORDER BY total_freight DESC, c.country;
+   country   | customers_count | active_customers | total_freight 
+-------------+-----------------+------------------+---------------
+ USA         |              13 |               13 |      13771.29
+ Germany     |              11 |               11 |      11283.28
+ Austria     |               2 |                2 |       7391.50
+ Brazil      |               9 |                9 |       4880.19
+ France      |              11 |               10 |       4237.84
+ Sweden      |               2 |                2 |       3237.60
+ UK          |               7 |                7 |       2954.27
+ Ireland     |               1 |                1 |       2755.24
+ Venezuela   |               4 |                4 |       2735.18
+ Canada      |               3 |                3 |       2198.09
+ Denmark     |               2 |                2 |       1396.19
+ Switzerland |               2 |                2 |       1368.53
+ Belgium     |               2 |                2 |       1280.14
+ Mexico      |               5 |                5 |       1122.78
+ Finland     |               2 |                2 |        910.89
+ Italy       |               3 |                3 |        864.44
+ Spain       |               5 |                4 |        861.89
+ Portugal    |               2 |                2 |        643.53
+ Argentina   |               3 |                3 |        598.58
+ Norway      |               1 |                1 |        275.50
+ Poland      |               1 |                1 |        175.74
+(21 rows)
+
+DROP TABLE IF EXISTS customer_activity;
+DROP TABLE
+CREATE OR REPLACE FUNCTION shipper_performance(p_year INT, p_min_orders INT DEFAULT 10)
+RETURNS TABLE (
+    shipper_name   TEXT,
+    orders_count   BIGINT,
+    avg_ship_days  NUMERIC,
+    late_orders    BIGINT,
+    late_pct       NUMERIC
+)
+LANGUAGE plpgsql
+STABLE
+AS $$
+BEGIN
+    IF p_year NOT BETWEEN 1996 AND 1998 THEN
+        RAISE EXCEPTION 'p_year нь 1996-1998 хооронд байх ёстой (өгсөн утга: %)', p_year;
+    END IF;
+
+    RETURN QUERY
+    SELECT
+        s.company_name::TEXT,
+        COUNT(*),
+        ROUND(AVG(ship_days(o.order_date, o.shipped_date)), 1),
+        COUNT(*) FILTER (WHERE o.shipped_date > o.required_date),
+        ROUND(100.0 * COUNT(*) FILTER (WHERE o.shipped_date > o.required_date)
+              / NULLIF(COUNT(*), 0), 1)
+    FROM orders AS o
+    JOIN shippers AS s ON s.shipper_id = o.ship_via
+    WHERE EXTRACT(YEAR FROM o.order_date) = p_year
+    GROUP BY s.company_name
+    HAVING COUNT(*) >= p_min_orders;
+END;
+$$;
+CREATE FUNCTION
+SELECT *
+FROM shipper_performance(1997, 10)
+ORDER BY late_pct DESC;
+   shipper_name   | orders_count | avg_ship_days | late_orders | late_pct 
+------------------+--------------+---------------+-------------+----------
+ United Package   |          153 |          10.2 |          11 |      7.2
+ Speedy Express   |          133 |           8.6 |           6 |      4.5
+ Federal Shipping |          122 |           7.7 |           5 |      4.1
+(3 rows)
+
+SELECT *
+FROM shipper_performance(p_year => 1998, p_min_orders => 80)
+ORDER BY orders_count DESC;
+  shipper_name  | orders_count | avg_ship_days | late_orders | late_pct 
+----------------+--------------+---------------+-------------+----------
+ United Package |          117 |           8.6 |           3 |      2.6
+(1 row)
+
+SELECT shipper_name, avg_ship_days, late_pct
+FROM shipper_performance(1996)
+WHERE late_pct > 5;
+   shipper_name   | avg_ship_days | late_pct 
+------------------+---------------+----------
+ Federal Shipping |           8.2 |      5.2
+ Speedy Express   |           8.3 |      5.3
+(2 rows)
+
+DO $$
+BEGIN
+    PERFORM * FROM shipper_performance(2000);
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Алдаа: %', SQLERRM;
+END;
+$$;
+NOTICE:  Алдаа: p_year нь 1996-1998 хооронд байх ёстой (өгсөн утга: 2000)
+DO
+CREATE OR REPLACE FUNCTION pct_of(p_part NUMERIC, p_whole NUMERIC)
+RETURNS NUMERIC
+LANGUAGE sql
+IMMUTABLE
+AS $$
+    -- p_whole нь 0 бол NULLIF нь NULL болгоно; NULL-д хуваавал NULL гарна
+    SELECT ROUND(100 * p_part / NULLIF(p_whole, 0), 1);
+$$;
+CREATE FUNCTION
+DROP TABLE IF EXISTS category_revenue;
+NOTICE:  table "category_revenue" does not exist, skipping
+DROP TABLE
+CREATE TEMP TABLE category_revenue AS
+SELECT
+    c.category_name,
+    ROUND(SUM((od.unit_price * od.quantity * (1 - od.discount))::numeric), 2) AS revenue,
+    SUM(od.quantity) AS units_sold
+FROM order_details AS od
+JOIN orders AS o ON o.order_id = od.order_id
+JOIN products AS p ON p.product_id = od.product_id
+JOIN categories AS c ON c.category_id = p.category_id
+WHERE EXTRACT(YEAR FROM o.order_date) = 1997
+GROUP BY c.category_name;
+SELECT 8
+SELECT
+    category_name,
+    revenue,
+    units_sold,
+    pct_of(revenue, SUM(revenue) OVER ()) AS revenue_pct,
+    pct_of(SUM(revenue) OVER (ORDER BY revenue DESC), SUM(revenue) OVER ()) AS cum_pct
+FROM category_revenue
+ORDER BY revenue DESC;
+ category_name  |  revenue  | units_sold | revenue_pct | cum_pct 
+----------------+-----------+------------+-------------+---------
+ Dairy Products | 115387.64 |       4374 |        18.7 |    18.7
+ Beverages      | 103924.31 |       3996 |        16.8 |    35.5
+ Confections    |  82657.75 |       4137 |        13.4 |    48.9
+ Meat/Poultry   |  80975.11 |       2189 |        13.1 |    62.1
+ Seafood        |  66959.22 |       3679 |        10.9 |    72.9
+ Grains/Cereals |  56871.82 |       2636 |         9.2 |    82.1
+ Condiments     |  55368.59 |       2895 |         9.0 |    91.1
+ Produce        |  54940.77 |       1583 |         8.9 |   100.0
+(8 rows)
+
+SELECT category_name, revenue_pct, cum_pct
+FROM (
+    SELECT
+        category_name,
+        pct_of(revenue, SUM(revenue) OVER ()) AS revenue_pct,
+        pct_of(SUM(revenue) OVER (ORDER BY revenue DESC), SUM(revenue) OVER ()) AS cum_pct
+    FROM category_revenue
+) AS t
+WHERE cum_pct - revenue_pct < 50
+ORDER BY cum_pct;
+ category_name  | revenue_pct | cum_pct 
+----------------+-------------+---------
+ Dairy Products |        18.7 |    18.7
+ Beverages      |        16.8 |    35.5
+ Confections    |        13.4 |    48.9
+ Meat/Poultry   |        13.1 |    62.1
+(4 rows)
+
+DROP TABLE IF EXISTS category_revenue;
+DROP TABLE
+CREATE OR REPLACE FUNCTION customer_rfm(p_asof DATE DEFAULT DATE '1998-05-06')
+RETURNS TABLE (
+    customer_id   TEXT,
+    company_name  TEXT,
+    recency_days  INT,
+    frequency     BIGINT,
+    monetary      NUMERIC,
+    r_score       INT,
+    f_score       INT,
+    m_score       INT,
+    segment       TEXT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- Ижил transaction дотор дахин дуудахад алдаа гарахгүй
+    DROP TABLE IF EXISTS rfm_base;
+
+    -- 1-р алхам: харилцагч бүрийн R, F, M утга
+    CREATE TEMP TABLE rfm_base ON COMMIT DROP AS
+    SELECT
+        c.customer_id::TEXT AS customer_id,
+        c.company_name::TEXT AS company_name,
+        p_asof - MAX(o.order_date) AS recency_days,
+        COUNT(DISTINCT o.order_id) AS frequency,
+        SUM((od.unit_price * od.quantity * (1 - od.discount))::numeric) AS monetary
+    FROM customers AS c
+    JOIN orders AS o ON o.customer_id = c.customer_id
+    JOIN order_details AS od ON od.order_id = o.order_id
+    WHERE o.order_date <= p_asof
+    GROUP BY c.customer_id, c.company_name;
+
+    -- 2-р алхам: индекс ба статистик
+    CREATE INDEX ON rfm_base (customer_id);
+    ANALYZE rfm_base;
+
+    -- 3-р алхам: NTILE(4)-ээр оноо өгч, CASE-ээр сегментлэх.
+    -- Recency бага байх нь сайн тул DESC эрэмбээр хамгийн шинэ нь 4 оноо авна.
+    RETURN QUERY
+    SELECT
+        s.customer_id,
+        s.company_name,
+        s.recency_days,
+        s.frequency,
+        s.monetary,
+        s.r_score,
+        s.f_score,
+        s.m_score,
+        CASE
+            WHEN s.r_score >= 3 AND s.f_score >= 3 THEN 'Champion'
+            WHEN s.r_score >= 3 THEN 'New/Promising'
+            WHEN s.f_score >= 3 THEN 'At risk'
+            ELSE 'Hibernating'
+        END
+    FROM (
+        SELECT
+            b.*,
+            NTILE(4) OVER (ORDER BY b.recency_days DESC) AS r_score,
+            NTILE(4) OVER (ORDER BY b.frequency) AS f_score,
+            NTILE(4) OVER (ORDER BY b.monetary) AS m_score
+        FROM rfm_base AS b
+    ) AS s;
+END;
+$$;
+CREATE FUNCTION
+SELECT segment, COUNT(*) AS customers_count, ROUND(AVG(monetary), 2) AS avg_monetary
+FROM customer_rfm()
+GROUP BY segment
+ORDER BY avg_monetary DESC;
+NOTICE:  table "rfm_base" does not exist, skipping
+    segment    | customers_count | avg_monetary 
+---------------+-----------------+--------------
+ Champion      |              31 |     28642.19
+ At risk       |              13 |     14701.53
+ New/Promising |              13 |      5631.26
+ Hibernating   |              32 |      3548.71
+(4 rows)
+
+SELECT customer_id, company_name, recency_days, frequency,
+       ROUND(monetary, 2) AS monetary, r_score, f_score, m_score
+FROM customer_rfm()
+WHERE segment = 'At risk'
+ORDER BY monetary DESC
+LIMIT 10;
+NOTICE:  table "rfm_base" does not exist, skipping
+ customer_id |         company_name         | recency_days | frequency | monetary | r_score | f_score | m_score 
+-------------+------------------------------+--------------+-----------+----------+---------+---------+---------
+ MEREP       | Mère Paillarde               |          188 |        13 | 28872.19 |       1 |       4 |       4
+ FRANK       | Frankenversand               |           27 |        15 | 26656.56 |       2 |       4 |       4
+ BERGS       | Berglunds snabbköp           |           63 |        18 | 24927.58 |       1 |       4 |       4
+ BLONP       | Blondesddsl père et fils     |          114 |        11 | 18534.08 |       1 |       3 |       4
+ SEVES       | Seven Seas Imports           |           91 |         9 | 16215.33 |       1 |       3 |       3
+ VAFFE       | Vaffeljernet                 |           34 |        11 | 15843.92 |       2 |       3 |       3
+ AROUT       | Around the Horn              |           26 |        13 | 13390.65 |       2 |       4 |       3
+ SPLIR       | Split Rail Beer & Ale        |           42 |         9 | 11441.63 |       2 |       3 |       3
+ VICTE       | Victuailles en stock         |          103 |        10 |  9182.43 |       1 |       3 |       3
+ MAGAA       | Magazzini Alimentari Riuniti |           51 |        10 |  7176.21 |       2 |       3 |       3
+(10 rows)
+
+CREATE OR REPLACE FUNCTION restock_products(
+    p_category_name TEXT,
+    p_factor        NUMERIC DEFAULT 2.0
+) RETURNS INT
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_category_id INT;
+    v_count       INT;
+BEGIN
+    IF p_factor IS NULL OR p_factor NOT BETWEEN 1.0 AND 5.0 THEN
+        RAISE EXCEPTION 'p_factor нь 1.0-5.0 хооронд байх ёстой (өгсөн утга: %)', p_factor;
+    END IF;
+
+    SELECT category_id INTO v_category_id
+    FROM categories
+    WHERE category_name = p_category_name;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION '"%" нэртэй ангилал олдсонгүй', p_category_name;
+    END IF;
+
+    CREATE TEMP TABLE IF NOT EXISTS restock_log (
+        product_id   INT,
+        product_name TEXT,
+        old_on_order INT,
+        new_on_order INT,
+        changed_at   TIMESTAMP
+    );
+
+    -- UPDATE ... RETURNING-ийн мөрүүдийг шууд логт оруулна.
+    -- FROM products AS old нь өөрчлөгдөхөөс өмнөх утгыг өгнө.
+    WITH changed AS (
+        UPDATE products AS p
+        SET units_on_order = CEIL(p.reorder_level * p_factor)::INT
+        FROM products AS old
+        WHERE old.product_id = p.product_id
+          AND p.category_id = v_category_id
+          AND p.discontinued = 0
+          AND p.units_in_stock < p.reorder_level
+          AND p.units_on_order < CEIL(p.reorder_level * p_factor)  -- зөвхөн нэмэгдүүлнэ
+        RETURNING p.product_id, p.product_name, old.units_on_order AS old_on_order,
+                  p.units_on_order AS new_on_order
+    )
+    INSERT INTO restock_log (product_id, product_name, old_on_order, new_on_order, changed_at)
+    SELECT product_id, product_name, old_on_order, new_on_order, now()
+    FROM changed;
+
+    GET DIAGNOSTICS v_count = ROW_COUNT;
+
+    RAISE NOTICE '%: % бүтээгдэхүүний units_on_order шинэчлэгдлээ (p_factor = %)',
+        p_category_name, v_count, p_factor;
+
+    RETURN v_count;
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE EXCEPTION 'restock_products алдаа: %', SQLERRM;
+END;
+$$;
+CREATE FUNCTION
+BEGIN;
+BEGIN
+SELECT restock_products('Beverages', 2.0) AS updated_rows;
+NOTICE:  Beverages: 2 бүтээгдэхүүний units_on_order шинэчлэгдлээ (p_factor = 2.0)
+ updated_rows 
+--------------
+            2
+(1 row)
+
+DO $$
+BEGIN
+    PERFORM restock_products('Beverages', 0.5);
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Алдаа: %', SQLERRM;
+END;
+$$;
+NOTICE:  Алдаа: restock_products алдаа: p_factor нь 1.0-5.0 хооронд байх ёстой (өгсөн утга: 0.5)
+DO
+DO $$
+BEGIN
+    PERFORM restock_products('Electronics');
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Алдаа: %', SQLERRM;
+END;
+$$;
+NOTICE:  Алдаа: restock_products алдаа: "Electronics" нэртэй ангилал олдсонгүй
+DO
+SELECT * FROM restock_log ORDER BY product_id;
+ product_id | product_name  | old_on_order | new_on_order |         changed_at         
+------------+---------------+--------------+--------------+----------------------------
+         43 | Ipoh Coffee   |           10 |           50 | 2026-10-02 22:30:06.283007
+         70 | Outback Lager |           10 |           60 | 2026-10-02 22:30:06.283007
+(2 rows)
+
+ROLLBACK;
+ROLLBACK
+DROP TABLE IF EXISTS restock_log;
+NOTICE:  table "restock_log" does not exist, skipping
+DROP TABLE
+CREATE OR REPLACE FUNCTION abc_analysis(p_year INT)
+RETURNS TABLE (
+    product_id     INT,
+    product_name   TEXT,
+    category_name  TEXT,
+    revenue        NUMERIC,
+    revenue_pct    NUMERIC,
+    cum_pct        NUMERIC,
+    abc_class      CHAR(1)
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DROP TABLE IF EXISTS product_revenue;
+
+    -- Тухайн жилийн бүтээгдэхүүн бүрийн орлого
+    CREATE TEMP TABLE product_revenue ON COMMIT DROP AS
+    SELECT
+        p.product_id::INT AS product_id,
+        p.product_name::TEXT AS product_name,
+        c.category_name::TEXT AS category_name,
+        SUM((od.unit_price * od.quantity * (1 - od.discount))::numeric) AS revenue
+    FROM order_details AS od
+    JOIN orders AS o ON o.order_id = od.order_id
+    JOIN products AS p ON p.product_id = od.product_id
+    JOIN categories AS c ON c.category_id = p.category_id
+    WHERE EXTRACT(YEAR FROM o.order_date) = p_year
+    GROUP BY p.product_id, p.product_name, c.category_name;
+
+    -- Эзлэх хувь, хуримтлагдсан хувь, A/B/C ангилал
+    RETURN QUERY
+    SELECT
+        t.product_id,
+        t.product_name,
+        t.category_name,
+        ROUND(t.revenue, 2),
+        t.revenue_pct,
+        t.cum_pct,
+        (CASE
+            WHEN t.cum_pct <= 80 THEN 'A'
+            WHEN t.cum_pct <= 95 THEN 'B'
+            ELSE 'C'
+        END)::CHAR(1)
+    FROM (
+        SELECT
+            r.*,
+            pct_of(r.revenue, SUM(r.revenue) OVER ()) AS revenue_pct,
+            pct_of(SUM(r.revenue) OVER (ORDER BY r.revenue DESC ROWS UNBOUNDED PRECEDING),
+                   SUM(r.revenue) OVER ()) AS cum_pct
+        FROM product_revenue AS r
+    ) AS t
+    ORDER BY t.revenue DESC;
+END;
+$$;
+CREATE FUNCTION
+SELECT abc_class,
+       COUNT(*) AS products_count,
+       SUM(revenue) AS total_revenue,
+       ROUND(AVG(revenue), 2) AS avg_revenue
+FROM abc_analysis(1997)
+GROUP BY abc_class
+ORDER BY abc_class;
+NOTICE:  table "product_revenue" does not exist, skipping
+ abc_class | products_count | total_revenue | avg_revenue 
+-----------+----------------+---------------+-------------
+ A         |             36 |     492739.40 |    13687.21
+ B         |             21 |      91004.14 |     4333.53
+ C         |             20 |      33341.63 |     1667.08
+(3 rows)
+
+SELECT category_name,
+       COUNT(*) AS a_products,
+       SUM(revenue) AS a_revenue
+FROM abc_analysis(1997)
+WHERE abc_class = 'A'
+GROUP BY category_name
+ORDER BY a_products DESC, a_revenue DESC;
+NOTICE:  table "product_revenue" does not exist, skipping
+ category_name  | a_products | a_revenue 
+----------------+------------+-----------
+ Dairy Products |          8 | 111932.84
+ Meat/Poultry   |          5 |  77790.82
+ Confections    |          5 |  59033.10
+ Beverages      |          4 |  74685.64
+ Produce        |          4 |  53940.27
+ Seafood        |          4 |  42594.38
+ Condiments     |          4 |  32101.87
+ Grains/Cereals |          2 |  40660.48
+(8 rows)
+
+CREATE OR REPLACE FUNCTION abc_analysis_cte(p_year INT)
+RETURNS TABLE (
+    product_id     INT,
+    product_name   TEXT,
+    category_name  TEXT,
+    revenue        NUMERIC,
+    revenue_pct    NUMERIC,
+    cum_pct        NUMERIC,
+    abc_class      CHAR(1)
+)
+LANGUAGE sql
+STABLE
+AS $$
+    WITH product_revenue AS (
+        SELECT
+            p.product_id::INT AS product_id,
+            p.product_name::TEXT AS product_name,
+            c.category_name::TEXT AS category_name,
+            SUM((od.unit_price * od.quantity * (1 - od.discount))::numeric) AS revenue
+        FROM order_details AS od
+        JOIN orders AS o ON o.order_id = od.order_id
+        JOIN products AS p ON p.product_id = od.product_id
+        JOIN categories AS c ON c.category_id = p.category_id
+        WHERE EXTRACT(YEAR FROM o.order_date) = p_year
+        GROUP BY p.product_id, p.product_name, c.category_name
+    ),
+    ranked AS (
+        SELECT
+            r.*,
+            pct_of(r.revenue, SUM(r.revenue) OVER ()) AS revenue_pct,
+            pct_of(SUM(r.revenue) OVER (ORDER BY r.revenue DESC ROWS UNBOUNDED PRECEDING),
+                   SUM(r.revenue) OVER ()) AS cum_pct
+        FROM product_revenue AS r
+    )
+    SELECT
+        product_id,
+        product_name,
+        category_name,
+        ROUND(revenue, 2),
+        revenue_pct,
+        cum_pct,
+        (CASE
+            WHEN cum_pct <= 80 THEN 'A'
+            WHEN cum_pct <= 95 THEN 'B'
+            ELSE 'C'
+        END)::CHAR(1)
+    FROM ranked
+    ORDER BY revenue DESC;
+$$;
+CREATE FUNCTION
+SELECT * FROM abc_analysis(1997)
+EXCEPT
+SELECT * FROM abc_analysis_cte(1997);
+NOTICE:  table "product_revenue" does not exist, skipping
+ product_id | product_name | category_name | revenue | revenue_pct | cum_pct | abc_class 
+------------+--------------+---------------+---------+-------------+---------+-----------
+(0 rows)
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM abc_analysis(1997);
+NOTICE:  table "product_revenue" does not exist, skipping
+                                                    QUERY PLAN                                                    
+------------------------------------------------------------------------------------------------------------------
+ Function Scan on abc_analysis  (cost=0.25..10.25 rows=1000 width=196) (actual time=3.662..3.664 rows=77 loops=1)
+   Buffers: shared hit=3652, local hit=1 dirtied=1 written=1
+ Planning Time: 0.011 ms
+ Execution Time: 3.671 ms
+(4 rows)
+
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM abc_analysis_cte(1997);
+                                                                                         QUERY PLAN                                                                                          
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Subquery Scan on abc_analysis_cte  (cost=69.82..70.52 rows=10 width=196) (actual time=2.365..2.426 rows=77 loops=1)
+   Buffers: shared hit=3361
+   ->  Subquery Scan on ranked  (cost=69.82..70.42 rows=10 width=228) (actual time=2.364..2.421 rows=77 loops=1)
+         Buffers: shared hit=3361
+         ->  WindowAgg  (cost=69.82..70.32 rows=10 width=164) (actual time=2.364..2.410 rows=77 loops=1)
+               Buffers: shared hit=3361
+               ->  WindowAgg  (cost=69.82..69.99 rows=10 width=132) (actual time=2.326..2.348 rows=77 loops=1)
+                     Buffers: shared hit=3361
+                     ->  Sort  (cost=69.82..69.84 rows=10 width=100) (actual time=2.323..2.325 rows=77 loops=1)
+                           Sort Key: r.revenue DESC
+                           Sort Method: quicksort  Memory: 30kB
+                           Buffers: shared hit=3361
+                           ->  Subquery Scan on r  (cost=69.17..69.65 rows=10 width=100) (actual time=1.681..2.309 rows=77 loops=1)
+                                 Buffers: shared hit=3361
+                                 ->  GroupAggregate  (cost=69.17..69.55 rows=10 width=167) (actual time=1.681..2.304 rows=77 loops=1)
+                                       Group Key: p.product_id, c.category_name
+                                       Buffers: shared hit=3361
+                                       ->  Sort  (cost=69.17..69.20 rows=10 width=77) (actual time=1.663..1.684 rows=1059 loops=1)
+                                             Sort Key: p.product_id, c.category_name
+                                             Sort Method: quicksort  Memory: 121kB
+                                             Buffers: shared hit=3361
+                                             ->  Hash Join  (cost=5.63..69.01 rows=10 width=77) (actual time=0.033..1.501 rows=1059 loops=1)
+                                                   Hash Cond: (p.category_id = c.category_id)
+                                                   Buffers: shared hit=3361
+                                                   ->  Nested Loop  (cost=4.45..67.79 rows=10 width=31) (actual time=0.025..1.395 rows=1059 loops=1)
+                                                         Buffers: shared hit=3360
+                                                         ->  Nested Loop  (cost=4.30..66.14 rows=10 width=12) (actual time=0.021..0.929 rows=1059 loops=1)
+                                                               Buffers: shared hit=1242
+                                                               ->  Seq Scan on orders o  (cost=0.00..26.45 rows=4 width=2) (actual time=0.017..0.098 rows=408 loops=1)
+                                                                     Filter: (EXTRACT(year FROM order_date) = '1997'::numeric)
+                                                                     Rows Removed by Filter: 422
+                                                                     Buffers: shared hit=14
+                                                               ->  Bitmap Heap Scan on order_details od  (cost=4.30..9.89 rows=3 width=14) (actual time=0.001..0.001 rows=3 loops=408)
+                                                                     Recheck Cond: (order_id = o.order_id)
+                                                                     Heap Blocks: exact=410
+                                                                     Buffers: shared hit=1228
+                                                                     ->  Bitmap Index Scan on pk_order_details  (cost=0.00..4.30 rows=3 width=0) (actual time=0.000..0.000 rows=3 loops=408)
+                                                                           Index Cond: (order_id = o.order_id)
+                                                                           Buffers: shared hit=818
+                                                         ->  Index Scan using pk_products on products p  (cost=0.14..0.17 rows=1 width=21) (actual time=0.000..0.000 rows=1 loops=1059)
+                                                               Index Cond: (product_id = od.product_id)
+                                                               Buffers: shared hit=2118
+                                                   ->  Hash  (cost=1.08..1.08 rows=8 width=50) (actual time=0.006..0.006 rows=8 loops=1)
+                                                         Buckets: 1024  Batches: 1  Memory Usage: 9kB
+                                                         Buffers: shared hit=1
+                                                         ->  Seq Scan on categories c  (cost=0.00..1.08 rows=8 width=50) (actual time=0.003..0.003 rows=8 loops=1)
+                                                               Buffers: shared hit=1
+ Planning:
+   Buffers: shared hit=18
+ Planning Time: 0.540 ms
+ Execution Time: 2.489 ms
+(51 rows)
+
