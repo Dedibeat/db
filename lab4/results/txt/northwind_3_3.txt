@@ -1,0 +1,11 @@
+DO $$
+DECLARE
+    v_cursor refcursor := 'missing_orders';
+BEGIN
+    CALL spGetCustomerOrders('XXXXX', v_cursor);
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Алдаа: %', SQLERRM;
+END;
+$$;
+NOTICE:  Алдаа: "XXXXX" кодтой харилцагч олдсонгүй
+DO

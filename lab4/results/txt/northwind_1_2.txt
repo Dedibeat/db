@@ -1,0 +1,22 @@
+DO $$
+DECLARE
+    v_stock INT;
+BEGIN
+    CALL spUpdateProductStock(1, 100, v_stock);
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Алдаа: %', SQLERRM;
+END;
+$$;
+NOTICE:  Алдаа: "Chai" бүтээгдэхүүний нөөцөд 39 ширхэг байгаа тул 100 ширхэг хасах боломжгүй
+DO
+DO $$
+DECLARE
+    v_stock INT;
+BEGIN
+    CALL spUpdateProductStock(999, 1, v_stock);
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Алдаа: %', SQLERRM;
+END;
+$$;
+NOTICE:  Алдаа: 999 дугаартай бүтээгдэхүүн олдсонгүй
+DO

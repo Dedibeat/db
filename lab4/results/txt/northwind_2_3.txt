@@ -1,0 +1,6 @@
+CALL spInsertNewEmployee(11, 'Batbayarsaikhan', 'Dorj', '1995-03-15');
+NOTICE:  Алдаа: нэр хэт урт байна (FirstName <= 10, LastName <= 20 тэмдэгт). value too long for type character varying(10)
+                                                     p_message                                                     
+-------------------------------------------------------------------------------------------------------------------
+ Алдаа: нэр хэт урт байна (FirstName <= 10, LastName <= 20 тэмдэгт). value too long for type character varying(10)
+(1 row)

@@ -1,0 +1,11 @@
+DO $$
+BEGIN
+    -- job_id = 2 (Chief Executive Officer) allows levels 200-250, so 10 is invalid
+    INSERT INTO employee (emp_id, fname, lname, job_id, job_lvl)
+    VALUES ('ABC12345M', 'Test', 'User', 2, 10);
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Триггер зогсоолоо: %', SQLERRM;
+END;
+$$;
+NOTICE:  Триггер зогсоолоо: The level for job_id:2 should be between 200 and 250.
+DO

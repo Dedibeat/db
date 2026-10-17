@@ -1,0 +1,21 @@
+BEGIN;
+BEGIN
+CALL spGetCustomerOrders('ALFKI');
+    p_result     
+-----------------
+ customer_orders
+(1 row)
+
+FETCH ALL FROM customer_orders;
+ order_id | order_date |      ship_name       |    company_name     
+----------+------------+----------------------+---------------------
+    10643 | 1997-08-25 | Alfreds Futterkiste  | Alfreds Futterkiste
+    10692 | 1997-10-03 | Alfred's Futterkiste | Alfreds Futterkiste
+    10702 | 1997-10-13 | Alfred's Futterkiste | Alfreds Futterkiste
+    10835 | 1998-01-15 | Alfred's Futterkiste | Alfreds Futterkiste
+    10952 | 1998-03-16 | Alfred's Futterkiste | Alfreds Futterkiste
+    11011 | 1998-04-09 | Alfred's Futterkiste | Alfreds Futterkiste
+(6 rows)
+
+COMMIT;
+COMMIT

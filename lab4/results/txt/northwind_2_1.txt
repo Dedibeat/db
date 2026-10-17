@@ -1,0 +1,17 @@
+BEGIN;
+BEGIN
+CALL spInsertNewEmployee(10, 'Temuulen', 'Bold', '1998-04-12');
+NOTICE:  Амжилттай: Temuulen Bold (EmployeeID = 10) ажилтныг нэмлээ
+                         p_message                          
+------------------------------------------------------------
+ Амжилттай: Temuulen Bold (EmployeeID = 10) ажилтныг нэмлээ
+(1 row)
+
+SELECT employee_id, first_name, last_name, birth_date FROM employees WHERE employee_id = 10;
+ employee_id | first_name | last_name | birth_date 
+-------------+------------+-----------+------------
+          10 | Temuulen   | Bold      | 1998-04-12
+(1 row)
+
+ROLLBACK;
+ROLLBACK

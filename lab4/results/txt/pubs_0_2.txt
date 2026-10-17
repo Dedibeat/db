@@ -1,0 +1,19 @@
+BEGIN;
+BEGIN
+CALL reptq1();
+ p_result 
+----------
+ reptq1
+(1 row)
+
+FETCH ALL FROM reptq1;
+ pub_id | avg_price 
+--------+-----------
+ 0736   |    9.7840
+ 0877   |   15.4100
+ 1389   |   18.9760
+ ALL    |   14.7663
+(4 rows)
+
+COMMIT;
+COMMIT

@@ -1,0 +1,13 @@
+DO $$
+DECLARE
+    v_orders INT;
+    v_qty    INT;
+    v_amount NUMERIC;
+BEGIN
+    CALL spTotalSales('1994-12-31', '1993-01-01', v_orders, v_qty, v_amount);
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Алдаа: %', SQLERRM;
+END;
+$$;
+NOTICE:  Алдаа: Эхлэх огноо (1994-12-31) дуусах огнооноос (1993-01-01) хойно байна
+DO

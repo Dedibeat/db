@@ -1,0 +1,20 @@
+BEGIN;
+BEGIN
+CALL spGetCustomerOrders('vinet');
+    p_result     
+-----------------
+ customer_orders
+(1 row)
+
+FETCH ALL FROM customer_orders;
+ order_id | order_date |         ship_name         |       company_name        
+----------+------------+---------------------------+---------------------------
+    10248 | 1996-07-04 | Vins et alcools Chevalier | Vins et alcools Chevalier
+    10274 | 1996-08-06 | Vins et alcools Chevalier | Vins et alcools Chevalier
+    10295 | 1996-09-02 | Vins et alcools Chevalier | Vins et alcools Chevalier
+    10737 | 1997-11-11 | Vins et alcools Chevalier | Vins et alcools Chevalier
+    10739 | 1997-11-12 | Vins et alcools Chevalier | Vins et alcools Chevalier
+(5 rows)
+
+COMMIT;
+COMMIT

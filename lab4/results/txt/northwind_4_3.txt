@@ -1,0 +1,5 @@
+CALL spYearlySalesReport(1998);
+ order_count | units_sold | total_sales 
+-------------+------------+-------------
+         270 |      16247 |   440623.87
+(1 row)

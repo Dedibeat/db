@@ -1,0 +1,11 @@
+DO $$
+DECLARE
+    v_cursor refcursor := 'no_filter';
+BEGIN
+    CALL spSearchCustomers(NULL, NULL, NULL, v_cursor);
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Алдаа: %', SQLERRM;
+END;
+$$;
+NOTICE:  Алдаа: company name, contact name, city-ийн дор хаяж нэгийг оруулна уу
+DO

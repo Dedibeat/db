@@ -1,0 +1,13 @@
+DO $$
+DECLARE
+    v_amount NUMERIC;
+    v_orders INT;
+    v_books  INT;
+BEGIN
+    CALL spGenerateMonthlySalesReport(1994, 13, v_amount, v_orders, v_books);
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Алдаа: %', SQLERRM;
+END;
+$$;
+NOTICE:  Алдаа: Сар 1-12 хооронд байх ёстой (өгсөн утга: 13)
+DO

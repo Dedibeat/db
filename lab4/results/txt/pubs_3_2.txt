@@ -1,0 +1,18 @@
+BEGIN;
+BEGIN
+CALL spSearchBooks('cook');
+  p_result   
+-------------
+ books_found
+(1 row)
+
+FETCH ALL FROM books_found;
+                           title_name                            | price |     price_range     | publication_date 
+-----------------------------------------------------------------+-------+---------------------+------------------
+ Cooking with Computers: Surreptitious Balance Sheets            | 11.95 | Дунд ($10 - $19.99) | 1991-06-09
+ Onions, Leeks, and Garlic: Cooking Secrets of the Mediterranean | 20.95 | Үнэтэй (>= $20)     | 1991-10-21
+ The Psychology of Computer Cooking                              |       | Үнэ тогтоогоогүй    | 2026-10-17
+(3 rows)
+
+COMMIT;
+COMMIT

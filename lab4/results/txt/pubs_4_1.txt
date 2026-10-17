@@ -1,0 +1,5 @@
+CALL spGenerateMonthlySalesReport(1993, 5);
+ total_sales_amount | number_of_orders | books_sold 
+--------------------+------------------+------------
+            2794.90 |                3 |        165
+(1 row)

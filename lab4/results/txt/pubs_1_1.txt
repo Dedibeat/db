@@ -1,0 +1,5 @@
+CALL spTotalSales('1993-01-01', '1993-12-31');
+ order_count | total_qty | total_amount 
+-------------+-----------+--------------
+           7 |       250 |      3698.05
+(1 row)

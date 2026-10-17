@@ -1,0 +1,26 @@
+SELECT 'authors' AS table_name, COUNT(*) AS row_count FROM authors
+UNION ALL SELECT 'discounts',   COUNT(*) FROM discounts
+UNION ALL SELECT 'employee',    COUNT(*) FROM employee
+UNION ALL SELECT 'jobs',        COUNT(*) FROM jobs
+UNION ALL SELECT 'pub_info',    COUNT(*) FROM pub_info
+UNION ALL SELECT 'publishers',  COUNT(*) FROM publishers
+UNION ALL SELECT 'roysched',    COUNT(*) FROM roysched
+UNION ALL SELECT 'sales',       COUNT(*) FROM sales
+UNION ALL SELECT 'stores',      COUNT(*) FROM stores
+UNION ALL SELECT 'titleauthor', COUNT(*) FROM titleauthor
+UNION ALL SELECT 'titles',      COUNT(*) FROM titles
+ORDER BY table_name;
+ table_name  | row_count 
+-------------+-----------
+ authors     |        23
+ discounts   |         3
+ employee    |        43
+ jobs        |        14
+ pub_info    |         8
+ publishers  |         8
+ roysched    |        86
+ sales       |        21
+ stores      |         6
+ titleauthor |        25
+ titles      |        18
+(11 rows)

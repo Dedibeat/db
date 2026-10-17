@@ -1,0 +1,404 @@
+CREATE OR REPLACE PROCEDURE spUpdateProductStock(
+    p_product_id             INT,
+    p_quantity               INT,
+    INOUT new_units_in_stock INT DEFAULT NULL
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_product_name TEXT;
+    v_stock        INT;
+BEGIN
+    -- The quantity must be positive
+    IF p_quantity IS NULL OR p_quantity <= 0 THEN
+        RAISE EXCEPTION 'Хасах тоо эерэг бүхэл тоо байх ёстой (өгсөн утга: %)', p_quantity;
+    END IF;
+
+    -- Find the product and lock its row against concurrent changes (FOR UPDATE)
+    SELECT product_name, units_in_stock
+    INTO v_product_name, v_stock
+    FROM products
+    WHERE product_id = p_product_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION '% дугаартай бүтээгдэхүүн олдсонгүй', p_product_id;
+    END IF;
+
+    -- Do not let the stock go negative
+    IF v_stock < p_quantity THEN
+        RAISE EXCEPTION '"%" бүтээгдэхүүний нөөцөд % ширхэг байгаа тул % ширхэг хасах боломжгүй',
+            v_product_name, v_stock, p_quantity;
+    END IF;
+
+    -- Reduce the stock and return the new value
+    UPDATE products
+    SET units_in_stock = units_in_stock - p_quantity
+    WHERE product_id = p_product_id
+    RETURNING units_in_stock INTO new_units_in_stock;
+
+    RAISE NOTICE '"%": % -> % ширхэг', v_product_name, v_stock, new_units_in_stock;
+END;
+$$;
+CREATE PROCEDURE
+BEGIN;
+BEGIN
+SELECT product_id, product_name, units_in_stock FROM products WHERE product_id = 1;
+ product_id | product_name | units_in_stock 
+------------+--------------+----------------
+          1 | Chai         |             39
+(1 row)
+
+CALL spUpdateProductStock(1, 5);
+NOTICE:  "Chai": 39 -> 34 ширхэг
+ new_units_in_stock 
+--------------------
+                 34
+(1 row)
+
+SELECT product_id, product_name, units_in_stock FROM products WHERE product_id = 1;
+ product_id | product_name | units_in_stock 
+------------+--------------+----------------
+          1 | Chai         |             34
+(1 row)
+
+ROLLBACK;
+ROLLBACK
+DO $$
+DECLARE
+    v_stock INT;
+BEGIN
+    CALL spUpdateProductStock(1, 100, v_stock);
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Алдаа: %', SQLERRM;
+END;
+$$;
+NOTICE:  Алдаа: "Chai" бүтээгдэхүүний нөөцөд 39 ширхэг байгаа тул 100 ширхэг хасах боломжгүй
+DO
+DO $$
+DECLARE
+    v_stock INT;
+BEGIN
+    CALL spUpdateProductStock(999, 1, v_stock);
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Алдаа: %', SQLERRM;
+END;
+$$;
+NOTICE:  Алдаа: 999 дугаартай бүтээгдэхүүн олдсонгүй
+DO
+CREATE OR REPLACE PROCEDURE spInsertNewEmployee(
+    p_employee_id   INT,
+    p_first_name    TEXT,
+    p_last_name     TEXT,
+    p_birth_date    DATE,
+    INOUT p_message TEXT DEFAULT NULL
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- 1) Business rule checks
+    IF p_employee_id IS NULL OR p_employee_id <= 0 THEN
+        RAISE EXCEPTION 'EmployeeID эерэг бүхэл тоо байх ёстой';
+    END IF;
+    IF COALESCE(btrim(p_first_name), '') = '' OR COALESCE(btrim(p_last_name), '') = '' THEN
+        RAISE EXCEPTION 'Нэр (FirstName) болон овог (LastName) хоосон байж болохгүй';
+    END IF;
+    IF p_birth_date IS NULL THEN
+        RAISE EXCEPTION 'Төрсөн огноог (BirthDate) заавал оруулна';
+    END IF;
+    IF p_birth_date > CURRENT_DATE THEN
+        RAISE EXCEPTION 'Төрсөн огноо (%) ирээдүйд байж болохгүй', p_birth_date;
+    END IF;
+    IF p_birth_date > CURRENT_DATE - INTERVAL '18 years' THEN
+        RAISE EXCEPTION 'Ажилтан 18-аас доош настай байж болохгүй (төрсөн огноо: %)',
+            p_birth_date;
+    END IF;
+
+    -- 2) Insert the employee. The database itself detects errors such as
+    --    a duplicate ID or a name that is too long.
+    INSERT INTO employees (employee_id, first_name, last_name, birth_date)
+    VALUES (p_employee_id, btrim(p_first_name), btrim(p_last_name), p_birth_date);
+
+    p_message := format('Амжилттай: %s %s (EmployeeID = %s) ажилтныг нэмлээ',
+                        btrim(p_first_name), btrim(p_last_name), p_employee_id);
+    RAISE NOTICE '%', p_message;
+EXCEPTION
+    -- 3) Catch each kind of error and return a clear message
+    WHEN unique_violation THEN
+        p_message := format('Алдаа: %s дугаартай ажилтан аль хэдийн бүртгэлтэй байна',
+                            p_employee_id);
+        RAISE NOTICE '%', p_message;
+    WHEN string_data_right_truncation THEN
+        p_message := format('Алдаа: нэр хэт урт байна (FirstName <= 10, LastName <= 20 тэмдэгт). %s',
+                            SQLERRM);
+        RAISE NOTICE '%', p_message;
+    WHEN numeric_value_out_of_range THEN
+        p_message := format('Алдаа: EmployeeID хэт их байна (%s). %s', p_employee_id, SQLERRM);
+        RAISE NOTICE '%', p_message;
+    WHEN OTHERS THEN
+        p_message := 'Алдаа: ' || SQLERRM;
+        RAISE NOTICE '%', p_message;
+END;
+$$;
+CREATE PROCEDURE
+BEGIN;
+BEGIN
+CALL spInsertNewEmployee(10, 'Temuulen', 'Bold', '1998-04-12');
+NOTICE:  Амжилттай: Temuulen Bold (EmployeeID = 10) ажилтныг нэмлээ
+                         p_message                          
+------------------------------------------------------------
+ Амжилттай: Temuulen Bold (EmployeeID = 10) ажилтныг нэмлээ
+(1 row)
+
+SELECT employee_id, first_name, last_name, birth_date FROM employees WHERE employee_id = 10;
+ employee_id | first_name | last_name | birth_date 
+-------------+------------+-----------+------------
+          10 | Temuulen   | Bold      | 1998-04-12
+(1 row)
+
+ROLLBACK;
+ROLLBACK
+CALL spInsertNewEmployee(1, 'Anar', 'Bat', '1990-01-01');
+NOTICE:  Алдаа: 1 дугаартай ажилтан аль хэдийн бүртгэлтэй байна
+                       p_message                        
+--------------------------------------------------------
+ Алдаа: 1 дугаартай ажилтан аль хэдийн бүртгэлтэй байна
+(1 row)
+
+CALL spInsertNewEmployee(11, 'Batbayarsaikhan', 'Dorj', '1995-03-15');
+NOTICE:  Алдаа: нэр хэт урт байна (FirstName <= 10, LastName <= 20 тэмдэгт). value too long for type character varying(10)
+                                                     p_message                                                     
+-------------------------------------------------------------------------------------------------------------------
+ Алдаа: нэр хэт урт байна (FirstName <= 10, LastName <= 20 тэмдэгт). value too long for type character varying(10)
+(1 row)
+
+CALL spInsertNewEmployee(12, 'Saraa', 'Ganbold', '2030-01-01');
+NOTICE:  Алдаа: Төрсөн огноо (2030-01-01) ирээдүйд байж болохгүй
+                        p_message                        
+---------------------------------------------------------
+ Алдаа: Төрсөн огноо (2030-01-01) ирээдүйд байж болохгүй
+(1 row)
+
+CALL spInsertNewEmployee(13, '', 'Dorj', '1990-01-01');
+NOTICE:  Алдаа: Нэр (FirstName) болон овог (LastName) хоосон байж болохгүй
+                             p_message                             
+-------------------------------------------------------------------
+ Алдаа: Нэр (FirstName) болон овог (LastName) хоосон байж болохгүй
+(1 row)
+
+CREATE OR REPLACE PROCEDURE spGetCustomerOrders(
+    p_customer_id  TEXT,
+    INOUT p_result refcursor DEFAULT 'customer_orders'
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- The customer must exist
+    IF NOT EXISTS (SELECT 1 FROM customers WHERE customer_id = upper(btrim(p_customer_id))) THEN
+        RAISE EXCEPTION '"%" кодтой харилцагч олдсонгүй', p_customer_id;
+    END IF;
+
+    OPEN p_result FOR
+        SELECT o.order_id,
+               o.order_date,
+               o.ship_name,
+               c.company_name
+        FROM orders AS o
+        JOIN customers AS c ON c.customer_id = o.customer_id
+        WHERE c.customer_id = upper(btrim(p_customer_id))
+        ORDER BY o.order_date, o.order_id;
+END;
+$$;
+CREATE PROCEDURE
+BEGIN;
+BEGIN
+CALL spGetCustomerOrders('ALFKI');
+    p_result     
+-----------------
+ customer_orders
+(1 row)
+
+FETCH ALL FROM customer_orders;
+ order_id | order_date |      ship_name       |    company_name     
+----------+------------+----------------------+---------------------
+    10643 | 1997-08-25 | Alfreds Futterkiste  | Alfreds Futterkiste
+    10692 | 1997-10-03 | Alfred's Futterkiste | Alfreds Futterkiste
+    10702 | 1997-10-13 | Alfred's Futterkiste | Alfreds Futterkiste
+    10835 | 1998-01-15 | Alfred's Futterkiste | Alfreds Futterkiste
+    10952 | 1998-03-16 | Alfred's Futterkiste | Alfreds Futterkiste
+    11011 | 1998-04-09 | Alfred's Futterkiste | Alfreds Futterkiste
+(6 rows)
+
+COMMIT;
+COMMIT
+BEGIN;
+BEGIN
+CALL spGetCustomerOrders('vinet');
+    p_result     
+-----------------
+ customer_orders
+(1 row)
+
+FETCH ALL FROM customer_orders;
+ order_id | order_date |         ship_name         |       company_name        
+----------+------------+---------------------------+---------------------------
+    10248 | 1996-07-04 | Vins et alcools Chevalier | Vins et alcools Chevalier
+    10274 | 1996-08-06 | Vins et alcools Chevalier | Vins et alcools Chevalier
+    10295 | 1996-09-02 | Vins et alcools Chevalier | Vins et alcools Chevalier
+    10737 | 1997-11-11 | Vins et alcools Chevalier | Vins et alcools Chevalier
+    10739 | 1997-11-12 | Vins et alcools Chevalier | Vins et alcools Chevalier
+(5 rows)
+
+COMMIT;
+COMMIT
+DO $$
+DECLARE
+    v_cursor refcursor := 'missing_orders';
+BEGIN
+    CALL spGetCustomerOrders('XXXXX', v_cursor);
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Алдаа: %', SQLERRM;
+END;
+$$;
+NOTICE:  Алдаа: "XXXXX" кодтой харилцагч олдсонгүй
+DO
+CREATE OR REPLACE PROCEDURE spYearlySalesReport(
+    p_year            INT,
+    INOUT order_count INT     DEFAULT NULL,
+    INOUT units_sold  INT     DEFAULT NULL,
+    INOUT total_sales NUMERIC DEFAULT NULL
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF p_year IS NULL THEN
+        RAISE EXCEPTION 'Оныг заавал оруулна';
+    END IF;
+
+    -- Orders from January 1 of the year up to January 1 of the next year
+    SELECT COUNT(DISTINCT o.order_id),
+           COALESCE(SUM(od.quantity), 0),
+           COALESCE(ROUND(SUM(od.unit_price::NUMERIC * od.quantity
+                              * (1 - od.discount::NUMERIC)), 2), 0)
+    INTO order_count, units_sold, total_sales
+    FROM orders AS o
+    JOIN order_details AS od ON od.order_id = o.order_id
+    WHERE o.order_date >= make_date(p_year, 1, 1)
+      AND o.order_date <  make_date(p_year + 1, 1, 1);
+
+    IF order_count = 0 THEN
+        RAISE NOTICE '% онд захиалга бүртгэгдээгүй байна', p_year;
+    END IF;
+END;
+$$;
+CREATE PROCEDURE
+CALL spYearlySalesReport(1996);
+ order_count | units_sold | total_sales 
+-------------+------------+-------------
+         152 |       9581 |   208083.97
+(1 row)
+
+CALL spYearlySalesReport(1997);
+ order_count | units_sold | total_sales 
+-------------+------------+-------------
+         408 |      25489 |   617085.20
+(1 row)
+
+CALL spYearlySalesReport(1998);
+ order_count | units_sold | total_sales 
+-------------+------------+-------------
+         270 |      16247 |   440623.87
+(1 row)
+
+CREATE OR REPLACE PROCEDURE spSearchCustomers(
+    p_company_name TEXT DEFAULT NULL,
+    p_contact_name TEXT DEFAULT NULL,
+    p_city         TEXT DEFAULT NULL,
+    INOUT p_result refcursor DEFAULT 'customers_found'
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    -- Treat an empty string as NULL, i.e. "not given"
+    v_company TEXT := NULLIF(btrim(p_company_name), '');
+    v_contact TEXT := NULLIF(btrim(p_contact_name), '');
+    v_city    TEXT := NULLIF(btrim(p_city), '');
+BEGIN
+    IF v_company IS NULL AND v_contact IS NULL AND v_city IS NULL THEN
+        RAISE EXCEPTION 'company name, contact name, city-ийн дор хаяж нэгийг оруулна уу';
+    END IF;
+
+    OPEN p_result FOR
+        SELECT c.*
+        FROM customers AS c
+        WHERE (v_company IS NULL OR c.company_name ILIKE '%' || v_company || '%')
+          AND (v_contact IS NULL OR c.contact_name ILIKE '%' || v_contact || '%')
+          AND (v_city    IS NULL OR c.city         ILIKE '%' || v_city    || '%')
+        ORDER BY c.customer_id;
+END;
+$$;
+CREATE PROCEDURE
+BEGIN;
+BEGIN
+CALL spSearchCustomers(p_city => 'London');
+    p_result     
+-----------------
+ customers_found
+(1 row)
+
+FETCH ALL FROM customers_found;
+ customer_id |     company_name      |   contact_name    |    contact_title     |           address            |  city  | region | postal_code | country |     phone      |      fax       
+-------------+-----------------------+-------------------+----------------------+------------------------------+--------+--------+-------------+---------+----------------+----------------
+ AROUT       | Around the Horn       | Thomas Hardy      | Sales Representative | 120 Hanover Sq.              | London |        | WA1 1DP     | UK      | (171) 555-7788 | (171) 555-6750
+ BSBEV       | B's Beverages         | Victoria Ashworth | Sales Representative | Fauntleroy Circus            | London |        | EC2 5NT     | UK      | (171) 555-1212 | 
+ CONSH       | Consolidated Holdings | Elizabeth Brown   | Sales Representative | Berkeley Gardens 12  Brewery | London |        | WX1 6LT     | UK      | (171) 555-2282 | (171) 555-9199
+ EASTC       | Eastern Connection    | Ann Devon         | Sales Agent          | 35 King George               | London |        | WX3 6FW     | UK      | (171) 555-0297 | (171) 555-3373
+ NORTS       | North/South           | Simon Crowther    | Sales Associate      | South House 300 Queensbridge | London |        | SW7 1RZ     | UK      | (171) 555-7733 | (171) 555-2530
+ SEVES       | Seven Seas Imports    | Hari Kumar        | Sales Manager        | 90 Wadhurst Rd.              | London |        | OX15 4NB    | UK      | (171) 555-1717 | (171) 555-5646
+(6 rows)
+
+COMMIT;
+COMMIT
+BEGIN;
+BEGIN
+CALL spSearchCustomers(p_company_name => 'market', p_contact_name => 'elizabeth');
+    p_result     
+-----------------
+ customers_found
+(1 row)
+
+FETCH ALL FROM customers_found;
+ customer_id |     company_name      |   contact_name    |   contact_title    |      address       |   city    | region | postal_code | country |     phone      |      fax       
+-------------+-----------------------+-------------------+--------------------+--------------------+-----------+--------+-------------+---------+----------------+----------------
+ BOTTM       | Bottom-Dollar Markets | Elizabeth Lincoln | Accounting Manager | 23 Tsawassen Blvd. | Tsawassen | BC     | T2F 8M4     | Canada  | (604) 555-4729 | (604) 555-3745
+(1 row)
+
+COMMIT;
+COMMIT
+BEGIN;
+BEGIN
+CALL spSearchCustomers('alfreds', 'maria', 'berlin');
+    p_result     
+-----------------
+ customers_found
+(1 row)
+
+FETCH ALL FROM customers_found;
+ customer_id |    company_name     | contact_name |    contact_title     |    address    |  city  | region | postal_code | country |    phone    |     fax     
+-------------+---------------------+--------------+----------------------+---------------+--------+--------+-------------+---------+-------------+-------------
+ ALFKI       | Alfreds Futterkiste | Maria Anders | Sales Representative | Obere Str. 57 | Berlin |        | 12209       | Germany | 030-0074321 | 030-0076545
+(1 row)
+
+COMMIT;
+COMMIT
+DO $$
+DECLARE
+    v_cursor refcursor := 'no_filter';
+BEGIN
+    CALL spSearchCustomers(NULL, NULL, NULL, v_cursor);
+EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Алдаа: %', SQLERRM;
+END;
+$$;
+NOTICE:  Алдаа: company name, contact name, city-ийн дор хаяж нэгийг оруулна уу
+DO

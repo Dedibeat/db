@@ -1,0 +1,16 @@
+BEGIN;
+BEGIN
+CALL spSearchCustomers(p_company_name => 'market', p_contact_name => 'elizabeth');
+    p_result     
+-----------------
+ customers_found
+(1 row)
+
+FETCH ALL FROM customers_found;
+ customer_id |     company_name      |   contact_name    |   contact_title    |      address       |   city    | region | postal_code | country |     phone      |      fax       
+-------------+-----------------------+-------------------+--------------------+--------------------+-----------+--------+-------------+---------+----------------+----------------
+ BOTTM       | Bottom-Dollar Markets | Elizabeth Lincoln | Accounting Manager | 23 Tsawassen Blvd. | Tsawassen | BC     | T2F 8M4     | Canada  | (604) 555-4729 | (604) 555-3745
+(1 row)
+
+COMMIT;
+COMMIT

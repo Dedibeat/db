@@ -1,0 +1,29 @@
+BEGIN;
+BEGIN
+SELECT stor_id, ord_num, qty FROM sales WHERE title_id = 'PS2091' ORDER BY stor_id;
+ stor_id | ord_num  | qty 
+---------+----------+-----
+ 6380    | 722a     |   3
+ 7066    | QA7442.3 |  75
+ 7067    | D4482    |  10
+ 7131    | N914008  |  20
+(4 rows)
+
+CALL spTransferInventory('PS2091', '7066', '7067', 10);
+NOTICE:  Амжилттай: PS2091 номын 10 ширхэгийг 7066 -> 7067 дэлгүүрт шилжүүлж, D4482 захиалгын тоог нэмэгдүүллээ
+                                                p_status                                                
+--------------------------------------------------------------------------------------------------------
+ Амжилттай: PS2091 номын 10 ширхэгийг 7066 -> 7067 дэлгүүрт шилжүүлж, D4482 захиалгын тоог нэмэгдүүллээ
+(1 row)
+
+SELECT stor_id, ord_num, qty FROM sales WHERE title_id = 'PS2091' ORDER BY stor_id;
+ stor_id | ord_num  | qty 
+---------+----------+-----
+ 6380    | 722a     |   3
+ 7066    | QA7442.3 |  65
+ 7067    | D4482    |  20
+ 7131    | N914008  |  20
+(4 rows)
+
+ROLLBACK;
+ROLLBACK

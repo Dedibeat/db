@@ -1,0 +1,20 @@
+BEGIN;
+BEGIN
+CALL spSearchBooks('computer');
+  p_result   
+-------------
+ books_found
+(1 row)
+
+FETCH ALL FROM books_found;
+                           title_name                            | price |     price_range     | publication_date 
+-----------------------------------------------------------------+-------+---------------------+------------------
+ Computer Phobic AND Non-Phobic Individuals: Behavior Variations | 21.59 | Үнэтэй (>= $20)     | 1991-10-21
+ Cooking with Computers: Surreptitious Balance Sheets            | 11.95 | Дунд ($10 - $19.99) | 1991-06-09
+ Straight Talk About Computers                                   | 19.99 | Дунд ($10 - $19.99) | 1991-06-22
+ The Psychology of Computer Cooking                              |       | Үнэ тогтоогоогүй    | 2026-10-17
+ You Can Combat Computer Stress!                                 |  2.99 | Хямд (< $10)        | 1991-06-30
+(5 rows)
+
+COMMIT;
+COMMIT

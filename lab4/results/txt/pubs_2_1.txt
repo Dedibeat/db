@@ -1,0 +1,20 @@
+BEGIN;
+BEGIN
+CALL spTopAuthors(5);
+  p_result   
+-------------
+ top_authors
+(1 row)
+
+FETCH ALL FROM top_authors;
+ sales_rank |  author_id  |   author_name   | total_sales 
+------------+-------------+-----------------+-------------
+          1 | 998-72-3567 | Albert Ringer   |     1357.60
+          2 | 899-46-2035 | Anne Ringer     |     1302.20
+          3 | 427-17-2319 | Ann Dull        |     1000.00
+          3 | 846-92-7186 | Sheryl Hunter   |     1000.00
+          5 | 807-91-6654 | Sylvia Panteley |      838.00
+(5 rows)
+
+COMMIT;
+COMMIT

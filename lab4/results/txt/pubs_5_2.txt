@@ -1,0 +1,26 @@
+BEGIN;
+BEGIN
+SELECT stor_id, ord_num, qty FROM sales WHERE title_id = 'BU1032' ORDER BY stor_id;
+ stor_id | ord_num  | qty 
+---------+----------+-----
+ 6380    | 6871     |   5
+ 8042    | 423LL930 |  10
+(2 rows)
+
+CALL spTransferInventory('BU1032', '8042', '7896', 4);
+NOTICE:  Амжилттай: BU1032 номын 4 ширхэгийг 8042 -> 7896 дэлгүүрт шилжүүлж, шинэ TRF-261017214837 мөр нэмлээ
+                                               p_status                                               
+------------------------------------------------------------------------------------------------------
+ Амжилттай: BU1032 номын 4 ширхэгийг 8042 -> 7896 дэлгүүрт шилжүүлж, шинэ TRF-261017214837 мөр нэмлээ
+(1 row)
+
+SELECT stor_id, ord_num, qty, payterms FROM sales WHERE title_id = 'BU1032' ORDER BY stor_id;
+ stor_id |     ord_num      | qty |  payterms  
+---------+------------------+-----+------------
+ 6380    | 6871             |   5 | Net 60
+ 7896    | TRF-261017214837 |   4 | Transfer
+ 8042    | 423LL930         |   6 | ON invoice
+(3 rows)
+
+ROLLBACK;
+ROLLBACK

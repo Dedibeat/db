@@ -1,0 +1,23 @@
+BEGIN;
+BEGIN
+SELECT product_id, product_name, units_in_stock FROM products WHERE product_id = 1;
+ product_id | product_name | units_in_stock 
+------------+--------------+----------------
+          1 | Chai         |             39
+(1 row)
+
+CALL spUpdateProductStock(1, 5);
+NOTICE:  "Chai": 39 -> 34 ширхэг
+ new_units_in_stock 
+--------------------
+                 34
+(1 row)
+
+SELECT product_id, product_name, units_in_stock FROM products WHERE product_id = 1;
+ product_id | product_name | units_in_stock 
+------------+--------------+----------------
+          1 | Chai         |             34
+(1 row)
+
+ROLLBACK;
+ROLLBACK

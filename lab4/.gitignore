@@ -1,0 +1,8 @@
+# PDF preview made by `python scripts/build_report.py --pdf` (the Word file is the deliverable)
+23B1NUM1470_*.pdf
+
+scripts/__pycache__/
+
+# Office temporary lock files
+.~lock.*#
+~$*
