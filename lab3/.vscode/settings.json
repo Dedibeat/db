@@ -8,7 +8,7 @@
       "name": "Lab 3 Northwind",
       "group": "Course databases",
       "driver": "PostgreSQL",
-      "server": "localhost",
+      "server": "/var/run/postgresql",
       "port": 5432,
       "database": "northwind",
       "username": "dedibeat",

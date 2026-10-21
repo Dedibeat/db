@@ -258,6 +258,7 @@ $$;
 -- Даалгавар 7. pct_of() функц ба ангиллын орлогын бүтэц
 -- ============================================================
 
+
 CREATE OR REPLACE FUNCTION pct_of(p_part NUMERIC, p_whole NUMERIC)
 RETURNS NUMERIC
 LANGUAGE sql

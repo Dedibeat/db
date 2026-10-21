@@ -214,7 +214,13 @@ SELECT
         THEN (od.unit_price * od.quantity * (1 - od.discount))::numeric ELSE 0 END), 0) AS dairy_products,
     COALESCE(SUM(CASE WHEN cat.category_name = 'Grains/Cereals'
         THEN (od.unit_price * od.quantity * (1 - od.discount))::numeric ELSE 0 END), 0) AS grains_cereals,
-    COALESCE(SUM(CASE WHEN cat.category_name = 'Meat/Poultry'
+    COALESCE(SUM(CASE WHSELECT category_name, product_name,
+       ROUND(total_sales, 2) AS total_sales,
+       sales_rank
+FROM v_product_category_rank
+WHERE sales_rank <= 3
+ORDER BY category_name, sales_rank, product_name;
+EN cat.category_name = 'Meat/Poultry'
         THEN (od.unit_price * od.quantity * (1 - od.discount))::numeric ELSE 0 END), 0) AS meat_poultry,
     COALESCE(SUM(CASE WHEN cat.category_name = 'Produce'
         THEN (od.unit_price * od.quantity * (1 - od.discount))::numeric ELSE 0 END), 0) AS produce,
