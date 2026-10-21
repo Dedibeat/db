@@ -11,38 +11,20 @@
 үнийн дүнг шинэчлэх spUpdateProductPricesBySupplier процедур бичээрэй. 
 Процедур нь  @SupplierID, @IncreasePercentage оролтын параметрүүдтэй.*/
 
-DROP FUNCTION IF EXISTS udfCalculateNewPrice 
-	(SupplierID INT, IncreasePercentage NUMERIC);
-CREATE OR REPLACE FUNCTION udfCalculateNewPrice
-	(SupplierID INT, IncreasePercentage NUMERIC)
+-- Fixed: price each product by its own unit_price (old LIMIT 1 gave every product the same price)
+CREATE OR REPLACE FUNCTION udfCalculateNewPrice(prod_id INT, increase_pct NUMERIC)
 RETURNS NUMERIC AS $$
-DECLARE NewPrice NUMERIC;
 BEGIN
-    SELECT unit_price*(1+IncreasePercentage/100) INTO NewPrice
-    FROM products
-    WHERE supplier_id = SupplierID
-    ORDER BY product_id LIMIT 1;
-    RETURN NewPrice;
-END;
-$$ LANGUAGE plpgsql;
+    RETURN (SELECT unit_price * (1 + increase_pct / 100)
+            FROM products WHERE product_id = prod_id);
+END; $$ LANGUAGE plpgsql;
 
-DROP PROCEDURE IF EXISTS spUpdateProductPricesBySupplier
-	(SupplierID INT, IncreasePercentage NUMERIC);
-CREATE OR REPLACE PROCEDURE spUpdateProductPricesBySupplier
-	(SupplierID INT, IncreasePercentage NUMERIC)
-AS $$
-DECLARE ProductID INT; NewPrice NUMERIC;
+CREATE OR REPLACE PROCEDURE spUpdateProductPricesBySupplier(sup_id INT, increase_pct NUMERIC) AS $$
 BEGIN
-    FOR ProductID IN SELECT product_id FROM products WHERE supplier_id = SupplierID 
-	LOOP
-        NewPrice := udfCalculateNewPrice(SupplierID, IncreasePercentage);
-        UPDATE products
-        SET unit_price = NewPrice
-        WHERE product_id = ProductID;
-    END LOOP;
-END;
-$$ LANGUAGE plpgsql;
+    UPDATE products
+    SET unit_price = udfCalculateNewPrice(product_id, increase_pct)
+    WHERE supplier_id = sup_id;
+END; $$ LANGUAGE plpgsql;
 
 CALL spUpdateProductPricesBySupplier(2, 5);
-
-SELECT * FROM products;
+SELECT * FROM products WHERE supplier_id = 2;

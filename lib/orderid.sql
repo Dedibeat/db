@@ -7,34 +7,16 @@
 бүрийн дүнг бодох ба үр дүнг борлуулалтын тайланг дараах 
 (order_id, order_date, totalsales) гэж харуулах ёстой.*/
 
-CREATE OR REPLACE FUNCTION fnEmployeeSalesReport(
-    EmployeeID INT,
-    StartDate DATE,
-    EndDate DATE
-)
-RETURNS TABLE (
-    order_id INT,
-    order_date DATE,
-    total_sales NUMERIC
-)
-LANGUAGE plpgsql
-AS $$
+CREATE OR REPLACE FUNCTION fnEmployeeSalesReport(emp_id INT, start_date DATE, end_date DATE)
+RETURNS TABLE (order_id INT, order_date DATE, total_sales NUMERIC) AS $$
 BEGIN
-    RETURN QUERY 
-    SELECT o.order_id::INT, o.order_date, 
-           SUM(od.unit_price * od.quantity)::NUMERIC AS total_sales
-    FROM orders o
-    JOIN order_details od ON o.order_id = od.order_id
-    WHERE o.employee_id = EmployeeID
-    AND o.order_date BETWEEN StartDate AND EndDate
-    GROUP BY o.order_id, o.order_date;
-END;
-$$;
-
-
-
-SELECT * FROM employees;
-SELECT * FROM order_details;
-SELECT * FROM orders;
+    RETURN QUERY
+    SELECT o.order_id::INT, o.order_date, SUM(od.unit_price * od.quantity)::NUMERIC
+    FROM orders o JOIN order_details od ON od.order_id = o.order_id
+    WHERE o.employee_id = emp_id
+      AND o.order_date BETWEEN start_date AND end_date
+    GROUP BY o.order_id
+    ORDER BY o.order_date DESC;
+END; $$ LANGUAGE plpgsql;
 
 SELECT * FROM fnEmployeeSalesReport(4, '1996-07-04', '1996-07-31');

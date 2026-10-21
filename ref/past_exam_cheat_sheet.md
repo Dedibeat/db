@@ -57,13 +57,14 @@ END; $$ LANGUAGE plpgsql;
 
 ```sql
 FROM employees e
-JOIN employee_territories et ON et.employee_id = e.employee_id
-JOIN territories t           ON t.territory_id = et.territory_id
-JOIN orders o                ON o.employee_id  = e.employee_id
-JOIN order_details od        ON od.order_id    = o.order_id
-WHERE t.territory_description ILIKE territory_name
-GROUP BY e.employee_id, e.first_name, e.last_name, t.territory_id, t.territory_description
--- return territory_id as TEXT; description is bpchar → TRIM(...)::TEXT
+JOIN orders o         ON o.employee_id = e.employee_id
+JOIN order_details od ON od.order_id = o.order_id
+WHERE e.employee_id IN (SELECT et.employee_id
+                        FROM employee_territories et
+                        JOIN territories t ON t.territory_id = et.territory_id
+                        WHERE TRIM(t.territory_description) ILIKE territory_name)
+GROUP BY e.employee_id
+-- IN (...) not JOIN: 'New York' has 2 territory_ids, a JOIN would list each employee twice
 ```
 
 **New price (d3/percentage):** `LIMIT 1` gives every product the *first* product's price. Price it per product:

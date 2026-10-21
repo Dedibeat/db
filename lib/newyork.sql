@@ -6,44 +6,29 @@
 ажилтан тус бүрийн хийсэн борлуулалтын тайлан харуулах
 spSalesPerformanceReportByTerritory процедур бичээрэй.*/
 
+-- Fixed: join through employee_territories (old ON t.territory_id = t.territory_id matched everything)
 CREATE OR REPLACE FUNCTION udfCalculateSalesByEmployeeAndTerritory(territory_name TEXT)
-RETURNS TABLE (
-    employee_id SMALLINT,
-    employee_name TEXT,
-    total_sales NUMERIC,
-    territory_id SMALLINT,
-    territory_description TEXT
-) AS $$
+RETURNS TABLE (employee_id INT, employee_name TEXT, total_sales NUMERIC) AS $$
 BEGIN
-    RETURN QUERY 
-    SELECT e.employee_id::SMALLINT,
-           e.first_name || ' ' || e.last_name AS employee_name,
-           SUM(od.unit_price * od.quantity)::NUMERIC AS total_sales, 
-           t.territory_id::SMALLINT,
-           t.territory_description::TEXT
+    RETURN QUERY
+    SELECT e.employee_id::INT, e.first_name || ' ' || e.last_name,
+           SUM(od.unit_price * od.quantity)::NUMERIC
     FROM employees e
-    JOIN orders o ON e.employee_id = o.employee_id
-    JOIN order_details od ON o.order_id = od.order_id
-    JOIN customers c ON o.customer_id = c.customer_id
-    JOIN territories t ON t.territory_id = t.territory_id
-    WHERE t.territory_description ILIKE territory_name
-    GROUP BY e.employee_id, e.first_name, e.last_name, 
-             t.territory_id, t.territory_description;
-END;
-$$ LANGUAGE plpgsql;
+    JOIN orders o         ON o.employee_id = e.employee_id
+    JOIN order_details od ON od.order_id = o.order_id
+    WHERE e.employee_id IN (SELECT et.employee_id
+                            FROM employee_territories et
+                            JOIN territories t ON t.territory_id = et.territory_id
+                            WHERE TRIM(t.territory_description) ILIKE territory_name)
+    GROUP BY e.employee_id;
+END; $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION spSalesPerformanceReportByTerritory(territory_name TEXT)
-RETURNS TABLE (
-    employee_id SMALLINT,
-    employee_name TEXT,
-    total_sales NUMERIC,
-    territory_id SMALLINT,
-    territory_description TEXT
-) AS $$
+RETURNS TABLE (employee_id INT, employee_name TEXT, total_sales NUMERIC) AS $$
 BEGIN
-    RETURN QUERY 
-    SELECT * FROM udfCalculateSalesByEmployeeAndTerritory(territory_name);
-END;
-$$ LANGUAGE plpgsql;
+    RETURN QUERY
+    SELECT * FROM udfCalculateSalesByEmployeeAndTerritory(territory_name) u
+    ORDER BY u.total_sales DESC;
+END; $$ LANGUAGE plpgsql;
 
 SELECT * FROM spSalesPerformanceReportByTerritory('New York');

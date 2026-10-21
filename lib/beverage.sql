@@ -6,25 +6,17 @@
 udfCalculateTotalSalesByCategory(CategoryD) мэдээллийг харуулах
 vwSalesByCategory харагдац уусгэхэд ашиглана.*/
 
-CREATE OR REPLACE FUNCTION udfCalculateTotalSalesByCategory(in_category_id integer)
-RETURNS numeric AS $$
-DECLARE
-    total_sales numeric := 0;
+CREATE OR REPLACE FUNCTION udfCalculateTotalSalesByCategory(cat_id INT)
+RETURNS NUMERIC AS $$
 BEGIN
-    SELECT SUM(od.quantity * od.unit_price)
-    INTO total_sales
-    FROM order_details od
-    JOIN products p ON od.product_id = p.product_id 
-    WHERE p.category_id = in_category_id;
-    
-    RETURN total_sales;
-END;
-$$ LANGUAGE plpgsql;
+    RETURN (SELECT SUM(od.unit_price * od.quantity)
+            FROM order_details od JOIN products p USING (product_id)
+            WHERE p.category_id = cat_id);
+END; $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE VIEW vwSalesByCategory AS
-SELECT c.category_id,
-       c.category_name,
-       udfCalculateTotalSalesByCategory(c.category_id) AS total_sales
-FROM categories c;
+SELECT category_id, category_name,
+       udfCalculateTotalSalesByCategory(category_id) AS total_sales
+FROM categories;
 
 SELECT * FROM vwSalesByCategory;
